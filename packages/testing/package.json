@@ -1,0 +1,25 @@
+{
+  "name": "@snow-tzu/type-config-testing",
+  "version": "0.0.1",
+  "description": "Testing utilities for Type Config",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "jest --config ../../jest.config.js --passWithNoTests"
+  },
+  "keywords": [
+    "spring-config",
+    "testing",
+    "mocking"
+  ],
+  "author": "ganesan arunachalam",
+  "license": "MIT",
+  "dependencies": {
+    "@snow-tzu/type-config": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

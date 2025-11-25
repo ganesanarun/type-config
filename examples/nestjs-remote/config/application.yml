@@ -1,0 +1,18 @@
+server:
+  port: 3000
+  host: localhost
+
+database:
+  host: localhost
+  port: 5432
+  username: dev_user
+  password: dev_password
+
+app:
+  name: NestJS Remote App
+  version: 1.0.0
+  environment: development
+  features:
+    enableCache: true
+    enableMetrics: false
+    enableTracing: false

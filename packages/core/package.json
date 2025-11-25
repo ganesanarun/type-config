@@ -1,0 +1,43 @@
+{
+  "name": "@snow-tzu/type-config",
+  "version": "0.0.1",
+  "description": "Core configuration management system with Spring Boot-like features",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "test": "jest --config ../../jest.config.js --passWithNoTests",
+    "benchmark": "yarn build && node dist/benchmark/index.js",
+    "benchmark:loading": "yarn build && node dist/benchmark/config-loading.bench.js",
+    "benchmark:memory": "yarn build && node --expose-gc dist/benchmark/memory.bench.js",
+    "prepublishOnly": "yarn build"
+  },
+  "keywords": [
+    "config",
+    "configuration",
+    "spring",
+    "spring-boot",
+    "typescript",
+    "decorators",
+    "dependency-injection"
+  ],
+  "author": "ganesan arunachalam",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0",
+    "reflect-metadata": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.2.0"
+  }
+}

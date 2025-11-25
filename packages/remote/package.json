@@ -1,0 +1,49 @@
+{
+  "name": "@snow-tzu/type-config-remote",
+  "version": "0.0.1",
+  "description": "Remote configuration sources for Type Config (AWS Parameter Store, Consul, etcd)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "jest --config ../../jest.config.js --passWithNoTests"
+  },
+  "keywords": [
+    "spring-config",
+    "remote-config",
+    "aws",
+    "parameter-store",
+    "consul",
+    "etcd"
+  ],
+  "author": "ganesan arunachalam",
+  "license": "MIT",
+  "dependencies": {
+    "@snow-tzu/type-config": "workspace:*"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-ssm": "^3.0.0",
+    "consul": "^1.0.0",
+    "etcd3": "^1.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-ssm": {
+      "optional": true
+    },
+    "consul": {
+      "optional": true
+    },
+    "etcd3": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@aws-sdk/client-ssm": "^3.490.0",
+    "@types/consul": "^0.40.0",
+    "@types/node": "^20.10.0",
+    "consul": "^1.2.0",
+    "etcd3": "^1.1.2",
+    "typescript": "^5.3.0"
+  }
+}

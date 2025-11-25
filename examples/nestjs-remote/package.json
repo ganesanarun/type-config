@@ -1,0 +1,29 @@
+{
+  "name": "nestjs-remote-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NestJS example with remote config server using Type Config",
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "start": "cd dist && node main.js",
+    "build": "tsc",
+    "start:prod": "cd dist && NODE_ENV=production node main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@snow-tzu/type-config-nestjs": "workspace:*",
+    "@snow-tzu/type-config-remote": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "reflect-metadata": "^0.2.1",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  }
+}

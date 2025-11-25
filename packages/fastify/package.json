@@ -1,0 +1,33 @@
+{
+  "name": "@snow-tzu/type-config-fastify",
+  "version": "0.0.1",
+  "description": "Type Config plugin for Fastify",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "jest --config ../../jest.config.js --passWithNoTests"
+  },
+  "keywords": [
+    "spring-config",
+    "fastify",
+    "fastify-plugin",
+    "configuration"
+  ],
+  "author": "ganesan arunachalam",
+  "license": "MIT",
+  "dependencies": {
+    "@snow-tzu/type-config": "workspace:*",
+    "fastify-plugin": "^4.5.1"
+  },
+  "peerDependencies": {
+    "fastify": "^4.0.0",
+    "reflect-metadata": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "fastify": "^4.25.0",
+    "typescript": "^5.3.0"
+  }
+}
