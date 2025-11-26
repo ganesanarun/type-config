@@ -1,13 +1,13 @@
 {
   "name": "@snow-tzu/type-config",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Core configuration management system with Spring Boot-like features",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "test": "jest --config ../../jest.config.js --passWithNoTests",
+    "test": "jest --passWithNoTests",
     "benchmark": "yarn build && node dist/benchmark/index.js",
     "benchmark:loading": "yarn build && node dist/benchmark/config-loading.bench.js",
     "benchmark:memory": "yarn build && node --expose-gc dist/benchmark/memory.bench.js",

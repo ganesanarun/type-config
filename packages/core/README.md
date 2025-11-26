@@ -45,6 +45,10 @@
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration Files](#configuration-files)
+- [Advanced Features](#advanced-features)
+    - [Environment Variable Placeholders](#environment-variable-placeholders)
+    - [Map-Based Configuration](#map-based-configuration)
+    - [Record-Based Configuration](#record-based-configuration)
 - [API](#api)
     - [Decorators](#decorators)
     - [ConfigurationBuilder](#configurationbuilder)
@@ -63,6 +67,8 @@
 - 🔐 **Encryption** - Built-in support for encrypted values
 - ✅ **Validation** - Integration with class-validator
 - 💉 **DI Container** - Simple dependency injection system
+- 🗺️ **Map & Record binding** - Bind configuration to Map or Record types for dynamic key-value structures
+- 🔧 **Environment variable placeholders** - Use `${VAR:fallback}` syntax in YAML/JSON with fallback values
 
 ## Installation
 
@@ -151,6 +157,277 @@ database:
 
 **Important**: Ensure these files are copied to your `dist/` folder during build. See the [Configuration File Management Guide](./CONFIG_FILES.md) for details.
 
+## Advanced Features
+
+### Environment Variable Placeholders
+
+Use `${VAR_NAME:fallback}` syntax in your YAML/JSON configuration files to reference environment variables with optional fallback values.
+
+#### Basic Syntax
+
+```yaml
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD}  # No fallback - will be undefined if not set
+```
+
+#### How It Works
+
+1. **Environment variable exists**: Uses the environment variable value
+   ```bash
+   DB_HOST=prod-db.example.com
+   # Result: host = "prod-db.example.com"
+   ```
+
+2. **Environment variable missing with fallback**: Uses the fallback value
+   ```bash
+   # DB_HOST not set
+   # Result: host = "localhost"
+   ```
+
+3. **Environment variable missing without fallback**: Field becomes `undefined`
+   ```bash
+   # DB_PASSWORD not set
+   # Result: password = undefined (validation will fail if @Required)
+   ```
+
+#### Advanced Usage
+
+**Multiple placeholders in one value**:
+```yaml
+api:
+  url: ${API_PROTOCOL:https}://${API_HOST:api.example.com}:${API_PORT:443}
+  # Result: "https://api.example.com:443"
+```
+
+**Escaping placeholders**:
+```yaml
+message: \${USER} logged in  # Literal "${USER} logged in"
+```
+
+#### Precedence Rules
+
+Configuration values are resolved in this order (highest to lowest priority):
+
+1. **Explicit placeholder in profile-specific file** (e.g., `${PROD_VAR:fallback}`)
+2. **Explicit placeholder in base file** (e.g., `${BASE_VAR:fallback}`)
+3. **Underscore-based ENV variable** (e.g., `DATABASE_HOST` → `database.host`)
+4. **Literal value from files**
+5. **Default value from @DefaultValue decorator**
+
+**Important**: Explicit placeholders take absolute precedence. If you use `${VAR}` in your config, the underscore-based ENV resolution will NOT be applied to that field, even if the placeholder fails to resolve.
+
+#### Example with Profiles
+
+```yaml
+# application.yml
+database:
+  host: localhost
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD:defaultpass}
+
+# application-production.yml
+database:
+  host: prod-db.example.com
+  username: ${PROD_DB_USER:postgres}  # Overrides DB_USER
+  password: ${PROD_DB_PASSWORD}       # Overrides DB_PASSWORD
+```
+
+With `NODE_ENV=production` and `PROD_DB_USER=prod_user`:
+```javascript
+{
+  database: {
+    host: 'prod-db.example.com',  // Literal from production profile
+    username: 'prod_user',         // From PROD_DB_USER env var
+    password: undefined            // PROD_DB_PASSWORD not set, no fallback
+  }
+}
+```
+
+#### Disabling Placeholder Resolution
+
+```typescript
+const { configManager } = await new ConfigurationBuilder()
+  .withProfile('production')
+  .withConfigDir('./config')
+  .withOptions({ enablePlaceholderResolution: false })  // Disable
+  .build();
+```
+
+### Map-Based Configuration
+
+Bind configuration to `Map<string, T>` properties for dynamic key-value structures like multiple database connections or service endpoints.
+
+#### Basic Example
+
+```typescript
+import { ConfigurationProperties, ConfigProperty } from '@snow-tzu/type-config';
+
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Map<string, DatabaseConnection>;
+}
+```
+
+```yaml
+# config/application.yml
+databases:
+  connections:
+    primary:
+      host: localhost
+      port: 5432
+      username: postgres
+      password: secret
+    analytics:
+      host: analytics-db.example.com
+      port: 5432
+      username: analytics_user
+      password: analytics_pass
+```
+
+#### Using Map Configuration
+
+```typescript
+const dbConfig = container.get(DatabasesConfig);
+
+// Access using Map methods
+const primary = dbConfig.connections.get('primary');
+console.log(`Primary DB: ${primary.host}:${primary.port}`);
+
+// Check if connection exists
+if (dbConfig.connections.has('analytics')) {
+  const analytics = dbConfig.connections.get('analytics');
+  // Use analytics connection
+}
+
+// Iterate over all connections
+for (const [name, connection] of dbConfig.connections.entries()) {
+  console.log(`${name}: ${connection.host}`);
+}
+```
+
+#### Accessing Map Values via ConfigManager
+
+```typescript
+// Deep path access
+const primaryHost = configManager.get<string>('databases.connections.primary.host');
+// Result: "localhost"
+
+// Get entire map entry
+const primaryConfig = configManager.get('databases.connections.primary');
+// Result: { host: 'localhost', port: 5432, ... }
+
+// Get entire map as object
+const allConnections = configManager.get('databases.connections');
+// Result: { primary: {...}, analytics: {...} }
+
+// With default value
+const cacheHost = configManager.get('databases.connections.cache.host', 'localhost');
+```
+
+### Record-Based Configuration
+
+Use `Record<string, T>` as an alternative to Map. Records are plain objects with string keys, offering simpler syntax with bracket notation.
+
+#### Basic Example
+
+```typescript
+import { ConfigurationProperties, ConfigProperty, Required } from '@snow-tzu/type-config';
+
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+class DatabasesRecordConfig {
+  @ConfigProperty('connections')
+  @Required()
+  connections: Record<string, DatabaseConnection>;
+}
+```
+
+#### Using Record Configuration
+
+```typescript
+const dbConfig = container.get(DatabasesRecordConfig);
+
+// Access using bracket notation or dot notation
+const primary = dbConfig.connections['primary'];
+// or
+const primary = dbConfig.connections.primary;
+console.log(`Primary DB: ${primary.host}:${primary.port}`);
+
+// Check if connection exists
+if ('analytics' in dbConfig.connections) {
+  const analytics = dbConfig.connections['analytics'];
+  // Use analytics connection
+}
+
+// Iterate over all connections
+for (const [name, connection] of Object.entries(dbConfig.connections)) {
+  console.log(`${name}: ${connection.host}`);
+}
+```
+
+#### Map vs Record: Choosing Between Them
+
+| Feature | Map<string, T> | Record<string, T> |
+|---------|----------------|-------------------|
+| **Type** | True Map instance | Plain JavaScript object |
+| **Access Syntax** | `map.get('key')` | `record['key']` or `record.key` |
+| **Map Methods** | `.get()`, `.set()`, `.has()`, `.delete()` | Standard object operations |
+| **Iteration** | `map.entries()`, `map.keys()`, `map.values()` | `Object.entries()`, `Object.keys()`, `Object.values()` |
+| **JSON Serialization** | Requires conversion to object | Works directly |
+| **Use Case** | Need Map semantics and methods | Prefer plain object syntax |
+
+**Recommendation**: 
+- Use **Map** when you need true Map semantics with `.get()`, `.set()`, `.has()` methods
+- Use **Record** when you prefer plain object syntax with bracket/dot notation
+
+**Note**: Both Map and Record support the same configuration binding. The choice is purely based on your preferred API style.
+
+#### Complete Example with Placeholders
+
+```yaml
+# config/application.yml
+databases:
+  connections:
+    primary:
+      host: ${PRIMARY_DB_HOST:localhost}
+      port: ${PRIMARY_DB_PORT:5432}
+      username: ${PRIMARY_DB_USER:postgres}
+      password: ${PRIMARY_DB_PASSWORD:secret}
+    analytics:
+      host: ${ANALYTICS_DB_HOST:localhost}
+      port: 5432
+      username: analytics_user
+      password: ${ANALYTICS_DB_PASSWORD}
+```
+
+This combines both features: Map/Record binding with environment variable placeholders!
+
+#### Complete Working Example
+
+See the [Map and Placeholders Example](../../examples/map-and-placeholders/) for a full working demonstration including:
+- Multiple database connections with Map binding
+- Service endpoints configuration
+- Profile-specific placeholder overrides
+- Manual validation patterns
+- NestJS integration
+
 ## API
 
 ### Decorators
@@ -237,6 +514,8 @@ database:
 | DI integration    |          ✅ All frameworks           |      ❌      |   ❌    |   ✅ (NestJS)   |
 | Remote sources    |         ✅ AWS, Consul, etcd         |      ❌      |   ❌    |       ❌        |
 | Framework support |     ✅ Express, Fastify, NestJS      |      ❌      |   ❌    |   ✅ (NestJS)   |
+| Map/Record binding |      ✅ Dynamic key-value structures      |      ❌      |   ❌    |       ❌        |
+| ENV placeholders  |      ✅ ${VAR:fallback} syntax      |      ❌      |   ⚠️ Basic    |       ❌        |
 
 ## License
 

@@ -39,6 +39,8 @@
 - Type-safe configuration classes
 - Encrypted values
 - Validation with class-validator
+- Map & Record binding for dynamic key-value structures
+- Environment variable placeholders with `${VAR:fallback}` syntax
 
 ## Installation
 
@@ -164,6 +166,89 @@ database:
   host: prod-db.example.com
 ```
 
+## Advanced Features
+
+### Environment Variable Placeholders
+
+Use `${VAR:fallback}` syntax in your YAML/JSON files:
+
+```yaml
+# config/application.yml
+server:
+  host: ${SERVER_HOST:localhost}
+  port: ${SERVER_PORT:3000}
+
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD}  # No fallback - required
+```
+
+See the [core package documentation](../core/README.md#environment-variable-placeholders) for complete details.
+
+### Map-Based Configuration
+
+Bind configuration to `Map<string, T>` for dynamic collections:
+
+```typescript
+class ServiceEndpoint {
+  url: string;
+  timeout: number;
+  retries: number;
+}
+
+@ConfigurationProperties('services')
+class ServicesConfig {
+  @ConfigProperty('endpoints')
+  endpoints: Map<string, ServiceEndpoint>;
+}
+```
+
+```yaml
+# config/application.yml
+services:
+  endpoints:
+    auth:
+      url: http://localhost:8001
+      timeout: 5000
+      retries: 3
+    payment:
+      url: http://localhost:8002
+      timeout: 10000
+      retries: 5
+```
+
+**Usage in routes:**
+
+```typescript
+fastify.get('/api/services/:name', async (request, reply) => {
+  const servicesConfig = request.container.get(ServicesConfig);
+  const endpoint = servicesConfig.endpoints.get(request.params.name);
+  
+  if (!endpoint) {
+    return reply.code(404).send({ error: 'Service not found' });
+  }
+  
+  return endpoint;
+});
+```
+
+**Alternative: Record type** for plain object syntax:
+
+```typescript
+@ConfigurationProperties('services')
+class ServicesConfig {
+  @ConfigProperty('endpoints')
+  endpoints: Record<string, ServiceEndpoint>;
+}
+
+// Access with bracket notation
+const auth = servicesConfig.endpoints['auth'];
+```
+
+See the [core package documentation](../core/README.md#map-based-configuration) for complete details.
+
 ## API
 
 - `fastifyTypeConfig(options)` - Register Fastify plugin
@@ -187,6 +272,8 @@ database:
 | Encryption      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
 | Validation      |  ✅ class-validator  |       ❌        |   ❌    |      ❌      |
 | DI integration  |    ✅ Per-request    |       ❌        |   ❌    |      ❌      |
+| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
+| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
 
 ## License
 

@@ -7,6 +7,7 @@ export const DEFAULTS_KEY = Symbol('defaults');
 export const VALIDATE_KEY = Symbol('validate');
 export const INJECTABLE_KEY = Symbol('injectable');
 export const INJECT_KEY = Symbol('inject');
+export const RECORD_TYPE_KEY = 'custom:record';
 
 /**
  * Decorator to mark a class as a configuration properties class
@@ -83,5 +84,38 @@ export function Inject(token: any) {
     const existingInjections = Reflect.getMetadata(INJECT_KEY, target) || [];
     existingInjections[parameterIndex] = token;
     Reflect.defineMetadata(INJECT_KEY, existingInjections, target);
+  };
+}
+
+/**
+ * Decorator to mark a property as a Record type
+ * This ensures the property is not converted to a Map and remains a plain object.
+ * 
+ * Usage:
+ * ```typescript
+ * @ConfigurationProperties('databases')
+ * class DatabasesConfig {
+ *   @ConfigProperty('connections')
+ *   @RecordType()
+ *   connections: Record<string, DatabaseConnection>;
+ * }
+ * ```
+ * 
+ * **IMPORTANT**: Automatic validation of Record entries is NOT supported.
+ * This is a limitation of class-validator, which requires known properties at
+ * compile time. Record types have dynamic keys, so validation must be done manually.
+ * 
+ * For validation, implement manual checks in your application code:
+ * ```typescript
+ * const config = manager.bind(DatabasesConfig);
+ * for (const [name, conn] of Object.entries(config.connections)) {
+ *   if (!conn.host) throw new Error(`${name} missing host`);
+ *   // ... more validation
+ * }
+ * ```
+ */
+export function RecordType() {
+  return function (target: any, propertyKey: string) {
+    Reflect.defineMetadata(RECORD_TYPE_KEY, true, target, propertyKey);
   };
 }

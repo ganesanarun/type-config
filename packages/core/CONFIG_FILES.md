@@ -10,6 +10,7 @@ This guide explains how to properly manage configuration files (YAML, JSON) in y
 - [Solutions by Framework](#solutions-by-framework)
 - [Configuration Directory Resolution](#configuration-directory-resolution)
 - [Profile-Based Loading](#profile-based-loading)
+- [Advanced Configuration Features](#advanced-configuration-features)
 - [Troubleshooting](#troubleshooting)
 
 ## Overview
@@ -317,6 +318,208 @@ database:
   password: secret123  # from environment variable
 ```
 
+## Advanced Configuration Features
+
+### Environment Variable Placeholders
+
+Type Config supports `${VAR_NAME:fallback}` syntax in YAML/JSON files for referencing environment variables with optional fallback values.
+
+#### Syntax
+
+```yaml
+database:
+  host: ${DB_HOST:localhost}           # With fallback
+  port: ${DB_PORT:5432}                # With fallback
+  username: ${DB_USER:postgres}        # With fallback
+  password: ${DB_PASSWORD}             # No fallback - undefined if not set
+  
+api:
+  # Multiple placeholders in one value
+  url: ${API_PROTOCOL:https}://${API_HOST:api.example.com}:${API_PORT:443}
+  
+message:
+  # Escape with backslash for literal ${TEXT}
+  template: \${USER} logged in
+```
+
+#### Resolution Behavior
+
+1. **Environment variable exists**: Uses the environment variable value
+2. **Environment variable missing with fallback**: Uses the fallback value
+3. **Environment variable missing without fallback**: Field becomes `undefined`
+
+#### Precedence Rules
+
+Configuration values are resolved in this order (highest to lowest priority):
+
+1. **Explicit placeholder in profile-specific file** (e.g., `${PROD_VAR:fallback}`)
+2. **Explicit placeholder in base file** (e.g., `${BASE_VAR:fallback}`)
+3. **Underscore-based ENV variable** (e.g., `DATABASE_HOST` → `database.host`)
+4. **Literal value from files**
+5. **Default value from @DefaultValue decorator**
+
+**Critical**: Explicit placeholders take absolute precedence. If you use `${VAR}` in your config, underscore-based ENV resolution will NOT be applied to that field, even if the placeholder fails to resolve.
+
+#### Example with Profiles
+
+```yaml
+# application.yml
+database:
+  host: localhost
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD:defaultpass}
+
+# application-production.yml
+database:
+  host: prod-db.example.com
+  username: ${PROD_DB_USER:postgres}  # Overrides DB_USER placeholder
+  password: ${PROD_DB_PASSWORD}       # Overrides DB_PASSWORD placeholder
+```
+
+With `NODE_ENV=production`, `PROD_DB_USER=prod_user`, and `PROD_DB_PASSWORD` not set:
+
+```javascript
+{
+  database: {
+    host: 'prod-db.example.com',  // Literal from production profile
+    username: 'prod_user',         // From PROD_DB_USER env var
+    password: undefined            // PROD_DB_PASSWORD not set, no fallback
+  }
+}
+```
+
+#### Disabling Placeholder Resolution
+
+```typescript
+const { configManager } = await new ConfigurationBuilder()
+  .withOptions({ enablePlaceholderResolution: false })
+  .build();
+```
+
+### Map and Record Configuration
+
+Type Config supports binding configuration to `Map<string, T>` or `Record<string, T>` properties for dynamic key-value structures.
+
+#### Map-Based Configuration
+
+Use `Map<string, T>` for true Map semantics with `.get()`, `.set()`, `.has()` methods:
+
+```typescript
+import { ConfigurationProperties, ConfigProperty } from '@snow-tzu/type-config';
+
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Map<string, DatabaseConnection>;
+}
+```
+
+```yaml
+# config/application.yml
+databases:
+  connections:
+    primary:
+      host: localhost
+      port: 5432
+      username: postgres
+      password: secret
+    analytics:
+      host: analytics-db.example.com
+      port: 5432
+      username: analytics_user
+      password: analytics_pass
+```
+
+**Usage**:
+```typescript
+const dbConfig = container.get(DatabasesConfig);
+const primary = dbConfig.connections.get('primary');
+console.log(`Primary DB: ${primary.host}:${primary.port}`);
+```
+
+#### Record-Based Configuration
+
+Use `Record<string, T>` as an alternative to Map with plain object syntax:
+
+```typescript
+import { ConfigurationProperties, ConfigProperty, Required } from '@snow-tzu/type-config';
+
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+class DatabasesRecordConfig {
+  @ConfigProperty('connections')
+  @Required()
+  connections: Record<string, DatabaseConnection>;
+}
+```
+
+**Usage**:
+```typescript
+const dbConfig = container.get(DatabasesRecordConfig);
+const primary = dbConfig.connections['primary'];
+// or
+const primary = dbConfig.connections.primary;
+console.log(`Primary DB: ${primary.host}:${primary.port}`);
+```
+
+#### Map vs Record
+
+| Feature | Map<string, T> | Record<string, T> |
+|---------|----------------|-------------------|
+| **Type** | True Map instance | Plain JavaScript object |
+| **Syntax** | `map.get('key')` | `record['key']` or `record.key` |
+| **Use Case** | Need Map methods (.get, .set, .has) | Prefer plain object syntax |
+
+#### Combining with Placeholders
+
+```yaml
+databases:
+  connections:
+    primary:
+      host: ${PRIMARY_DB_HOST:localhost}
+      port: ${PRIMARY_DB_PORT:5432}
+      username: ${PRIMARY_DB_USER:postgres}
+      password: ${PRIMARY_DB_PASSWORD}
+    analytics:
+      host: ${ANALYTICS_DB_HOST:localhost}
+      port: 5432
+      username: analytics_user
+      password: ${ANALYTICS_DB_PASSWORD}
+```
+
+This combines Map/Record binding with environment variable placeholders for maximum flexibility!
+
+#### Accessing Map/Record Values via ConfigManager
+
+```typescript
+// Deep path access (works with both Map and Record)
+const primaryHost = configManager.get<string>('databases.connections.primary.host');
+
+// Get entire entry
+const primaryConfig = configManager.get('databases.connections.primary');
+
+// Get entire map/record as object
+const allConnections = configManager.get('databases.connections');
+
+// With default value
+const cacheHost = configManager.get('databases.connections.cache.host', 'localhost');
+```
+
+**Note**: When using `configManager.get()` with Map-based configuration, the Map is returned as a plain object for easier access.
+
 
 ## Troubleshooting
 
@@ -413,6 +616,83 @@ Error: Required configuration property 'database.host' is missing
    - ✅ Verify files are actually copied (not just linked)
    - ✅ Check Docker volume mounts
 
+### Placeholder not resolving
+
+**Symptom**: `${VAR:fallback}` appears literally in configuration or resolves incorrectly
+
+**Causes & Solutions**:
+
+1. **Placeholder resolution disabled**
+   - ✅ Check if `enablePlaceholderResolution: false` is set
+   - ✅ Default is `true`, so ensure you haven't explicitly disabled it
+
+2. **Malformed placeholder syntax**
+   - ✅ Correct: `${VAR_NAME:fallback}` or `${VAR_NAME}`
+   - ✅ Incorrect: `$VAR_NAME`, `${VAR_NAME:}` (empty fallback is valid though)
+   - ✅ Ensure no spaces: `${ VAR }` won't work
+
+3. **Environment variable name mismatch**
+   - ✅ Check exact variable name: `echo $VAR_NAME`
+   - ✅ Variable names are case-sensitive
+   - ✅ Add debug: `console.log('ENV:', process.env.VAR_NAME)`
+
+4. **Escaped placeholder**
+   - ✅ `\${TEXT}` produces literal `${TEXT}` - this is intentional
+   - ✅ Remove backslash if you want resolution
+
+### Map/Record binding not working
+
+**Symptom**: Map property is undefined or not a Map instance
+
+**Causes & Solutions**:
+
+1. **TypeScript metadata not emitted**
+   - ✅ Ensure `"emitDecoratorMetadata": true` in tsconfig.json
+   - ✅ Ensure `"experimentalDecorators": true` in tsconfig.json
+   - ✅ Import `reflect-metadata` at application entry point
+
+2. **Configuration structure mismatch**
+   - ✅ YAML must have object structure for Map/Record binding
+   - ✅ Example:
+     ```yaml
+     connections:
+       key1: { host: localhost }
+       key2: { host: remote }
+     ```
+   - ✅ Not: `connections: "string"` or `connections: [array]`
+
+3. **Wrong property type annotation**
+   - ✅ Use `Map<string, T>` not `Map<any, any>`
+   - ✅ Use `Record<string, T>` not just `object`
+   - ✅ Ensure value type `T` is properly defined
+
+4. **Map not being created**
+   - ✅ Verify the property is typed as `Map<string, T>` (not just `any` or `object`)
+   - ✅ Check that configuration data exists at the specified path
+   - ✅ Add debug logging: `console.log(configManager.get('your.path'))`
+
+### Precedence not working as expected
+
+**Symptom**: Wrong value is used when multiple sources provide the same property
+
+**Causes & Solutions**:
+
+1. **Explicit placeholder vs underscore-based ENV**
+   - ✅ Explicit placeholder `${VAR}` ALWAYS takes precedence
+   - ✅ Even if placeholder fails, underscore-based ENV won't be used
+   - ✅ Example: `password: ${DB_PASS}` with `DATABASE_PASSWORD=secret`
+     - Result: `undefined` (not "secret") if DB_PASS not set
+
+2. **Profile-specific not overriding base**
+   - ✅ Verify profile is set: `console.log(configManager.getProfile())`
+   - ✅ Check profile file exists: `application-{profile}.yml`
+   - ✅ Ensure profile file is loaded after base file
+
+3. **Environment variable not overriding file**
+   - ✅ Check ENV var is actually set: `echo $VAR_NAME`
+   - ✅ Verify underscore-based naming: `DATABASE_HOST` → `database.host`
+   - ✅ For kebab-case: `databases.connections.my-db.host` → `DATABASES_CONNECTIONS_MY_DB_HOST`
+
 ## Quick Checklist
 
 Before deploying or running your application:
@@ -440,7 +720,7 @@ Before deploying or running your application:
 If you're still having issues:
 
 1. Enable debug logging in your application
-2. Check the [GitHub Issues](https://github.com/snow-tzu/type-config/issues)
+2. Check the [GitHub Issues](https://github.com/ganesanarun/type-config/issues)
 3. Review the [examples directory](../../examples/) for working configurations
 4. Create a minimal reproduction case
 

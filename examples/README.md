@@ -93,6 +93,31 @@ Pure Node.js application (no framework) using Type Config Core.
 
 ---
 
+### 6. Map and Placeholders (`map-and-placeholders/`)
+
+NestJS application demonstrating advanced Type Config features: Map-based configuration and placeholder resolution.
+
+**Features:**
+
+- **Map-based configuration binding**: Use `Map<string, T>` for collections (databases, services)
+- **Placeholder resolution**: `${VAR:fallback}` syntax with environment variables
+- **Profile-specific placeholders**: Different ENV vars per environment
+- **Precedence rules**: Explicit placeholders vs underscore-based ENV resolution
+- **Nested structures**: Complex objects as map values
+- **Comprehensive validation**: class-validator integration for map entries
+
+**Start:** `cd map-and-placeholders && yarn dev`
+
+**Production:** `NODE_ENV=production yarn dev`
+
+**Key Concepts:**
+- Map binding eliminates repetitive property definitions
+- Placeholders support fallback values for development
+- Profile-specific configs can override which ENV vars are used
+- Both explicit placeholders and underscore-based ENV resolution work together
+
+---
+
 ## Quick Start
 
 ### Install All Dependencies

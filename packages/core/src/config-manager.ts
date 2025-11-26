@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 import { validateSync, ValidationError } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import {
   CONFIG_PREFIX_KEY,
   CONFIG_PROPERTIES_KEY,
@@ -9,6 +10,8 @@ import {
   VALIDATE_KEY,
 } from './decorators';
 import { ConfigSource, EncryptionHelper, EnvConfigSource, FileConfigSource } from './sources';
+import { PlaceholderResolver } from './placeholder-resolver';
+import { MapBinder } from './map-binder';
 
 export interface ConfigManagerOptions {
   profile?: string;
@@ -18,6 +21,7 @@ export interface ConfigManagerOptions {
   enableHotReload?: boolean;
   encryptionKey?: string;
   validateOnBind?: boolean;
+  enablePlaceholderResolution?: boolean;
 }
 
 export type ConfigChangeListener = (newConfig: Record<string, any>) => void;
@@ -35,10 +39,16 @@ export class ConfigManager {
   private changeListeners: ConfigChangeListener[] = [];
   private encryptionHelper?: EncryptionHelper;
   private validateOnBind: boolean;
+  private placeholderResolver: PlaceholderResolver;
+  private enablePlaceholderResolution: boolean;
+  private mapBinder: MapBinder;
 
   constructor(private options: ConfigManagerOptions = {}) {
     this.profile = options.profile || process.env.NODE_ENV || 'development';
     this.validateOnBind = options.validateOnBind ?? true;
+    this.enablePlaceholderResolution = options.enablePlaceholderResolution ?? true;
+    this.placeholderResolver = new PlaceholderResolver();
+    this.mapBinder = new MapBinder();
 
     if (options.encryptionKey) {
       this.encryptionHelper = new EncryptionHelper(options.encryptionKey);
@@ -52,7 +62,7 @@ export class ConfigManager {
     if (this.initialized) return;
 
     const configDir = this.options.configDir || './config';
-    console.log(`[ConfigManager] Initializing with configDir: ${configDir}, profile: ${this.profile}`);
+    // console.log(`[ConfigManager] Initializing with configDir: ${configDir}, profile: ${this.profile}`);
 
     // Add default sources with priority
     this.sources.push(
@@ -63,7 +73,7 @@ export class ConfigManager {
       new EnvConfigSource(this.options.envPrefix, 200)
     );
     
-    console.log(`[ConfigManager] Added ${this.sources.length} config sources`);
+    // console.log(`[ConfigManager] Added ${this.sources.length} config sources`);
 
     // Add additional sources
     if (this.options.additionalSources) {
@@ -76,7 +86,7 @@ export class ConfigManager {
     // Load all sources and merge
     await this.reload();
 
-    // Setup hot reload if enabled
+    // Set up hot reload if enabled
     if (this.options.enableHotReload && this.options.configDir) {
       this.setupHotReload();
     }
@@ -90,29 +100,50 @@ export class ConfigManager {
   private async reload(): Promise<void> {
     const newConfig: Record<string, any> = {};
 
+    // Step 1: Load and merge all sources (including EnvConfigSource with underscore-based resolution)
     for (const source of this.sources) {
       try {
         const data = await source.load();
-        console.log(`[ConfigManager] Loading source: ${source.name}, data:`, JSON.stringify(data, null, 2));
+        // console.log(`[ConfigManager] Loading source: ${source.name}, data:`, JSON.stringify(data, null, 2));
         this.deepMerge(newConfig, data);
-        console.log(`[ConfigManager] After merge, config:`, JSON.stringify(newConfig, null, 2));
+        // console.log(`[ConfigManager] After merge, config:`, JSON.stringify(newConfig, null, 2));
       } catch (err) {
         console.warn(`Failed to load config source ${source.name}:`, err);
       }
     }
 
-    // Decrypt encrypted values if encryption is enabled
-    if (this.encryptionHelper) {
-      this.config = this.encryptionHelper.decryptObject(newConfig);
-    } else {
-      this.config = newConfig;
+    // Step 2: Resolve explicit environment variable placeholders if enabled
+    // This happens AFTER merging all sources (including underscore-based ENV resolution)
+    // Underscore-based ENV vars (from EnvConfigSource) take precedence over file values
+    // Then explicit placeholders are resolved, which can reference any ENV var
+    let resolvedConfig = newConfig;
+    if (this.enablePlaceholderResolution) {
+      // console.log('[ConfigManager] Resolving explicit placeholders...');
+      resolvedConfig = this.resolveEnvironmentVariables(newConfig);
+      // console.log('[ConfigManager] After placeholder resolution:', JSON.stringify(resolvedConfig, null, 2));
     }
 
-    // Clear cached instances to force rebinding
+    // Step 3: Decrypt encrypted values if encryption is enabled
+    if (this.encryptionHelper) {
+      this.config = this.encryptionHelper.decryptObject(resolvedConfig);
+    } else {
+      this.config = resolvedConfig;
+    }
+
+    // Clearly cached instances to force rebinding
     this.configInstances.clear();
 
     // Notify listeners
     this.notifyListeners();
+  }
+
+  /**
+   * Resolve environment variable placeholders in configuration
+   * @param config - Configuration object with potential placeholders
+   * @returns Configuration with placeholders resolved
+   */
+  private resolveEnvironmentVariables(config: Record<string, any>): Record<string, any> {
+    return this.placeholderResolver.resolveObject(config);
   }
 
   /**
@@ -255,11 +286,19 @@ export class ConfigManager {
   /**
    * Format validation errors for display
    */
-  private formatValidationErrors(errors: ValidationError[]): string {
+  private formatValidationErrors(errors: ValidationError[], prefix = ''): string {
     return errors
       .map(error => {
         const constraints = error.constraints ? Object.values(error.constraints).join(', ') : '';
-        return `  - ${error.property}: ${constraints}`;
+        let message = `  ${prefix}- ${error.property}: ${constraints}`;
+        
+        // Handle nested validation errors
+        if (error.children && error.children.length > 0) {
+          const childMessages = this.formatValidationErrors(error.children, prefix + '  ');
+          message += '\n' + childMessages;
+        }
+        
+        return message;
       })
       .join('\n');
   }
@@ -271,6 +310,32 @@ export class ConfigManager {
     const type = Reflect.getMetadata('design:type', instance, propertyKey);
 
     if (!type) return value;
+
+    // Handle Map type
+    if (type === Map) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error(`Cannot bind primitive value to Map<string, T> for property '${propertyKey}'`);
+      }
+      
+      // Convert object to Map
+      const map = this.mapBinder.objectToMap(value);
+      
+      // Note: Automatic validation of Map entries is NOT supported.
+      // This is a limitation of class-validator, which requires known properties
+      // at compile time. Map entries must be validated manually if needed.
+      
+      return map;
+    }
+
+    // Handle Record type (design:type will be Object)
+    // Record types are left as plain objects (not converted to Map)
+    // Note: Automatic validation of Record entries is NOT supported.
+    // This is a limitation of class-validator, which requires known properties
+    // at compile time. Record entries must be validated manually if needed.
+    if (type === Object && this.mapBinder.isRecordProperty(instance, propertyKey)) {
+      // Keep as plain object
+      return value;
+    }
 
     switch (type.name) {
       case 'Number':

@@ -1,13 +1,13 @@
 {
   "name": "@snow-tzu/type-config-remote",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Remote configuration sources for Type Config (AWS Parameter Store, Consul, etcd)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "test": "jest --config ../../jest.config.js --passWithNoTests"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "spring-config",

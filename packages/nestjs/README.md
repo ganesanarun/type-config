@@ -40,6 +40,8 @@
 - Hot reload support
 - Encrypted values
 - Validation with class-validator
+- Map & Record binding for dynamic key-value structures
+- Environment variable placeholders with `${VAR:fallback}` syntax
 
 ## Installation
 
@@ -153,6 +155,86 @@ server:
 ```
 
 For more, see the [Configuration File Management Guide](../core/CONFIG_FILES.md).
+
+## Advanced Features
+
+### Environment Variable Placeholders
+
+Use `${VAR:fallback}` syntax in your YAML/JSON files:
+
+```yaml
+# config/application.yml
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD}  # No fallback - required in production
+```
+
+See the [core package documentation](../core/README.md#environment-variable-placeholders) for complete details on placeholder syntax and precedence rules.
+
+### Map-Based Configuration
+
+Bind configuration to `Map<string, T>` for dynamic collections:
+
+```typescript
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+export class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Map<string, DatabaseConnection>;
+}
+```
+
+```yaml
+# config/application.yml
+databases:
+  connections:
+    primary:
+      host: localhost
+      port: 5432
+      username: postgres
+      password: secret
+    analytics:
+      host: analytics-db.example.com
+      port: 5432
+      username: analytics_user
+      password: analytics_pass
+```
+
+**Usage in services:**
+
+```typescript
+@Injectable()
+export class DatabaseService {
+  constructor(private readonly dbConfig: DatabasesConfig) {}
+
+  getConnection(name: string) {
+    return this.dbConfig.connections.get(name);
+  }
+}
+```
+
+**Alternative: Record type** for plain object syntax:
+
+```typescript
+@ConfigurationProperties('databases')
+export class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Record<string, DatabaseConnection>;
+}
+
+// Access with bracket notation
+const primary = this.dbConfig.connections['primary'];
+```
+
+See the [core package documentation](../core/README.md#map-based-configuration) for complete details and the [Map and Placeholders Example](../../examples/map-and-placeholders/) for a full working NestJS application.
 
 ## Usage Patterns
 
@@ -318,6 +400,8 @@ You can call `forFeature` in multiple modules as long as `forRoot` was called so
 | Encryption      |     ✅ Built-in     |       ❌        |   ❌    |      ❌      |
 | Validation      | ✅ class-validator  |   ⚠️ Manual    |   ❌    |      ❌      |
 | DI integration  |      ✅ Native      |       ✅        |   ❌    |      ❌      |
+| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
+| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
 
 ## License
 

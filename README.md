@@ -504,6 +504,6 @@ MIT © Ganesan Arunachalam
 ## Support
 
 - 📚 [Documentation](./packages/core/README.md)
-- 💬 [GitHub Issues](https://github.com/snow-tzu/type-config/issues)
+- 💬 [GitHub Issues](https://github.com/ganesanarun/type-config/issues)
 - 📧 [Email Support](mailto:support@example.com)
 - 💡 [Examples](./examples)

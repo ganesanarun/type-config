@@ -15,4 +15,5 @@ export {
   Required,
   DefaultValue,
   Validate,
+  RecordType,
 } from '@snow-tzu/type-config';

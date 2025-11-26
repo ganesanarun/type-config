@@ -1,13 +1,13 @@
 {
   "name": "@snow-tzu/type-config-nestjs",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Type Config integration for NestJS with native DI support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "test": "jest --config ../../jest.config.js --passWithNoTests"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "spring-config",

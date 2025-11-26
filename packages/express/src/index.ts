@@ -9,6 +9,8 @@ export {
   Validate,
   Injectable,
   Inject,
+  RecordType,
   ConfigManager,
   Container,
+  MapBinder,
 } from '@snow-tzu/type-config';

@@ -1,0 +1,68 @@
+# Base configuration with placeholders and map structures
+server:
+  host: ${SERVER_HOST:localhost}
+  port: ${SERVER_PORT:3000}
+  name: ${APP_NAME:map-and-placeholders-app}
+
+# Map-based database connections configuration
+databases:
+  connections:
+    # US region database
+    serhafen-us:
+      host: ${DB_US_HOST:localhost}
+      port: ${DB_US_PORT:5432}
+      username: ${DB_US_USERNAME:postgres}
+      password: ${DB_US_PASSWORD:dev_password}
+      database: serhafen_common
+      schema: us
+      ssl: false
+    
+    # AG region database
+    serhafen-ag:
+      host: ${DB_AG_HOST:localhost}
+      port: ${DB_AG_PORT:5432}
+      username: ${DB_AG_USERNAME:postgres}
+      password: ${DB_AG_PASSWORD:dev_password}
+      database: serhafen_ag
+      schema: ag
+      ssl: false
+    
+    # Analytics database
+    analytics:
+      host: ${DB_ANALYTICS_HOST:localhost}
+      port: ${DB_ANALYTICS_PORT:5432}
+      username: ${DB_ANALYTICS_USERNAME:analytics_user}
+      password: ${DB_ANALYTICS_PASSWORD:analytics_pass}
+      database: analytics_db
+      schema: public
+      ssl: false
+  
+  # Connection pool settings
+  pool:
+    min: ${DB_POOL_MIN:2}
+    max: ${DB_POOL_MAX:10}
+    idle: ${DB_POOL_IDLE:10000}
+
+# Map-based service endpoints
+services:
+  endpoints:
+    auth-service:
+      url: ${AUTH_SERVICE_URL:http://localhost:8001}
+      timeout: ${AUTH_SERVICE_TIMEOUT:5000}
+      retries: 3
+    
+    payment-service:
+      url: ${PAYMENT_SERVICE_URL:http://localhost:8002}
+      timeout: ${PAYMENT_SERVICE_TIMEOUT:10000}
+      retries: 5
+    
+    notification-service:
+      url: ${NOTIFICATION_SERVICE_URL:http://localhost:8003}
+      timeout: ${NOTIFICATION_SERVICE_TIMEOUT:3000}
+      retries: 2
+
+# Feature flags with placeholders
+features:
+  enableNewUI: ${FEATURE_NEW_UI:false}
+  enableBetaFeatures: ${FEATURE_BETA:false}
+  maintenanceMode: ${MAINTENANCE_MODE:false}
