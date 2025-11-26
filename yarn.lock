@@ -7563,6 +7563,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nested-config-example@workspace:examples/nested-basic":
+  version: 0.0.0-use.local
+  resolution: "nested-config-example@workspace:examples/nested-basic"
+  dependencies:
+    "@nestjs/cli": "npm:^10.0.0"
+    "@nestjs/common": "npm:^10.0.0"
+    "@nestjs/core": "npm:^10.0.0"
+    "@nestjs/platform-express": "npm:^10.0.0"
+    "@snow-tzu/type-config-nestjs": "workspace:*"
+    "@types/node": "npm:^20.10.0"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.0"
+    reflect-metadata: "npm:^0.2.1"
+    rxjs: "npm:^7.8.1"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.3.0"
+  languageName: unknown
+  linkType: soft
+
 "nestjs-basic-example@workspace:examples/nestjs-basic":
   version: 0.0.0-use.local
   resolution: "nestjs-basic-example@workspace:examples/nestjs-basic"

@@ -2,9 +2,9 @@
 
 > **Type-safe, multi-source, hot-reloadable configuration for Fastify**
 
-[![npm version](https://img.shields.io/npm/v/@snow-tzu/config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/config-fastify)
-[![license](https://img.shields.io/npm/l/@snow-tzu/config-fastify.svg)](LICENSE)
-[![downloads](https://img.shields.io/npm/dm/@snow-tzu/config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/config-fastify)
+[![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
+[![license](https://img.shields.io/npm/l/@snow-tzu/type-config-fastify.svg)](LICENSE)
+[![downloads](https://img.shields.io/npm/dm/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
 
 ---
 
@@ -12,7 +12,6 @@
 
 - **Type-safe**: Decorator-based config classes with TypeScript
 - **Profile support**: Spring-style profiles for dev, prod, etc.
-- **Hot reload**: Watch and reload config changes instantly
 - **Multi-source**: Merge YAML, JSON, .env, env vars, remote
 - **Fastify plugin**: Config and DI in every request
 - **Encryption**: Secure secrets with built-in AES-256
@@ -39,6 +38,8 @@
 - Type-safe configuration classes
 - Encrypted values
 - Validation with class-validator
+- Map & Record binding for dynamic key-value structures
+- Environment variable placeholders with `${VAR:fallback}` syntax
 
 ## Installation
 
@@ -93,11 +94,15 @@ await fastify.listen({ port: serverConfig.port, host: serverConfig.host });
 
 ### ⚠️ CRITICAL: Configuration File Management
 
-**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless properly configured.
+**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless
+properly configured.
 
-📖 **[Read the Complete Configuration File Management Guide](../core/CONFIG_FILES.md)**
+📖 *
+*[Read the Complete Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md)
+**
 
 This comprehensive guide covers:
+
 - Why configuration files disappear during builds
 - Solutions for Fastify, Express, NestJS, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -164,6 +169,90 @@ database:
   host: prod-db.example.com
 ```
 
+## Advanced Features
+
+### Environment Variable Placeholders
+
+Use `${VAR:fallback}` syntax in your YAML/JSON files:
+
+```yaml
+# config/application.yml
+server:
+  host: ${SERVER_HOST:localhost}
+  port: ${SERVER_PORT:3000}
+
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD}  # No fallback - required
+```
+
+See the [core package documentation](../core/README.md#environment-variable-placeholders) for complete details.
+
+### Map-Based Configuration
+
+Bind configuration to `Map<string, T>` for dynamic collections:
+
+```typescript
+class ServiceEndpoint {
+  url: string;
+  timeout: number;
+  retries: number;
+}
+
+@ConfigurationProperties('services')
+class ServicesConfig {
+  @ConfigProperty('endpoints')
+  endpoints: Map<string, ServiceEndpoint>;
+}
+```
+
+```yaml
+# config/application.yml
+services:
+  endpoints:
+    auth:
+      url: http://localhost:8001
+      timeout: 5000
+      retries: 3
+    payment:
+      url: http://localhost:8002
+      timeout: 10000
+      retries: 5
+```
+
+**Usage in routes:**
+
+```typescript
+fastify.get('/api/services/:name', async (request, reply) => {
+  const servicesConfig = request.container.get(ServicesConfig);
+  const endpoint = servicesConfig.endpoints.get(request.params.name);
+
+  if (!endpoint) {
+    return reply.code(404).send({ error: 'Service not found' });
+  }
+
+  return endpoint;
+});
+```
+
+**Alternative: Record type** for plain object syntax:
+
+```typescript
+
+@ConfigurationProperties('services')
+class ServicesConfig {
+  @ConfigProperty('endpoints')
+  endpoints: Record<string, ServiceEndpoint>;
+}
+
+// Access with bracket notation
+const auth = servicesConfig.endpoints['auth'];
+```
+
+See the [core package documentation](../core/README.md#map-based-configuration) for complete details.
+
 ## API
 
 - `fastifyTypeConfig(options)` - Register Fastify plugin
@@ -178,15 +267,17 @@ database:
 
 ## Comparison
 
-| Feature         | type-config/fastify | fastify-config | dotenv | node-config |
-|-----------------|:-------------------:|:--------------:|:------:|:-----------:|
-| Type safety     |  ✅ Decorators, TS   |       ❌        |   ❌    |      ❌      |
-| Multi-source    |  ✅ YAML, env, etc.  |   ⚠️ Partial   |   ❌    |      ✅      |
-| Profile support |   ✅ Spring-style    |       ❌        |   ❌    |      ✅      |
-| Hot reload      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Encryption      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Validation      |  ✅ class-validator  |       ❌        |   ❌    |      ❌      |
-| DI integration  |    ✅ Per-request    |       ❌        |   ❌    |      ❌      |
+| Feature            | type-config/fastify  | fastify-config |  dotenv  | node-config |
+|--------------------|:--------------------:|:--------------:|:--------:|:-----------:|
+| Type safety        |   ✅ Decorators, TS   |       ❌        |    ❌     |      ❌      |
+| Multi-source       |  ✅ YAML, env, etc.   |   ⚠️ Partial   |    ❌     |      ✅      |
+| Profile support    |    ✅ Spring-style    |       ❌        |    ❌     |      ✅      |
+| Hot reload         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Encryption         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Validation         |  ✅ class-validator   |       ❌        |    ❌     |      ❌      |
+| DI integration     |    ✅ Per-request     |       ❌        |    ❌     |      ❌      |
+| Map/Record binding | ✅ Dynamic structures |       ❌        |    ❌     |      ❌      |
+| ENV placeholders   |  ✅ ${VAR:fallback}   |       ❌        | ⚠️ Basic |      ❌      |
 
 ## License
 

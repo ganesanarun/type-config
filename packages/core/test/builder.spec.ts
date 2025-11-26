@@ -1,7 +1,10 @@
 import 'reflect-metadata';
-import { ConfigurationBuilder } from '../src/builder';
-import { InMemoryConfigSource } from '../src/sources';
-import { ConfigurationProperties, ConfigProperty } from '../src/decorators';
+import {
+  ConfigProperty,
+  ConfigurationBuilder,
+  ConfigurationProperties,
+  InMemoryConfigSource,
+} from '../src';
 
 describe('ConfigurationBuilder', () => {
   describe('withProfile', () => {
@@ -148,7 +151,9 @@ describe('ConfigurationBuilder', () => {
       }
 
       const builder = new ConfigurationBuilder();
-      builder.addSource(new InMemoryConfigSource({ config1: { value: 'v1' }, config2: { value: 'v2' } }, 100));
+      builder.addSource(
+        new InMemoryConfigSource({ config1: { value: 'v1' }, config2: { value: 'v2' } }, 100)
+      );
 
       builder.registerConfigs([Config1, Config2]);
       const { container } = await builder.build();

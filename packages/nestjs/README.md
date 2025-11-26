@@ -12,7 +12,6 @@
 
 - **Type-safe**: Decorator-based config classes with TypeScript
 - **Profile support**: Spring-style profiles for dev, prod, etc.
-- **Hot reload**: Watch and reload config changes instantly
 - **Multi-source**: Merge YAML, JSON, .env, env vars, remote
 - **NestJS DI**: Config classes are injectable anywhere
 - **Encryption**: Secure secrets with built-in AES-256
@@ -40,6 +39,8 @@
 - Hot reload support
 - Encrypted values
 - Validation with class-validator
+- Map & Record binding for dynamic key-value structures
+- Environment variable placeholders with `${VAR:fallback}` syntax
 
 ## Installation
 
@@ -88,7 +89,7 @@ export class AppModule {}
 
 **NestJS deletes the `dist` folder during compilation, which can remove your YAML/JSON configuration files unless properly managed.**
 
-See the [Configuration File Management Guide](../core/CONFIG_FILES.md) for:
+See the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md) for:
 - Why configuration files disappear during builds
 - Solutions for NestJS, Express, Fastify, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -145,14 +146,96 @@ TypeConfigModule.forRoot({
 server:
   host: localhost
   port: 3000
+```
 
 # application-production.yml
+```yaml
 server:
   host: 0.0.0.0
   port: 8080
 ```
 
-For more, see the [Configuration File Management Guide](../core/CONFIG_FILES.md).
+For more, see the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md).
+
+## Advanced Features
+
+### Environment Variable Placeholders
+
+Use `${VAR:fallback}` syntax in your YAML/JSON files:
+
+```yaml
+# config/application.yml
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASSWORD}  # No fallback - required in production
+```
+
+See the [core package documentation](https://github.com/ganesanarun/type-config/blob/main/packages/core/README.md#environment-variable-placeholders) for complete details on placeholder syntax and precedence rules.
+
+### Map-Based Configuration
+
+Bind configuration to `Map<string, T>` for dynamic collections:
+
+```typescript
+class DatabaseConnection {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+}
+
+@ConfigurationProperties('databases')
+export class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Map<string, DatabaseConnection>;
+}
+```
+
+```yaml
+# config/application.yml
+databases:
+  connections:
+    primary:
+      host: localhost
+      port: 5432
+      username: postgres
+      password: secret
+    analytics:
+      host: analytics-db.example.com
+      port: 5432
+      username: analytics_user
+      password: analytics_pass
+```
+
+**Usage in services:**
+
+```typescript
+@Injectable()
+export class DatabaseService {
+  constructor(private readonly dbConfig: DatabasesConfig) {}
+
+  getConnection(name: string) {
+    return this.dbConfig.connections.get(name);
+  }
+}
+```
+
+**Alternative: Record type** for plain object syntax:
+
+```typescript
+@ConfigurationProperties('databases')
+export class DatabasesConfig {
+  @ConfigProperty('connections')
+  connections: Record<string, DatabaseConnection>;
+}
+
+// Access with bracket notation
+const primary = this.dbConfig.connections['primary'];
+```
+
+See the [core package documentation](https://github.com/ganesanarun/type-config/tree/main/packages/core#map-based-configuration) for complete details.
 
 ## Usage Patterns
 
@@ -223,10 +306,10 @@ export class EmailModule {}
 
 #### When to use each pattern
 
-| Pattern         | Use When                                             |
-|----------------|------------------------------------------------------|
-| ConfigModule    | Large apps, dynamic modules, better organization     |
-| Global         | Small apps, simple config, no dynamic module injection|
+| Pattern      | Use When                                               |
+|--------------|--------------------------------------------------------|
+| ConfigModule | Large apps, dynamic modules, better organization       |
+| Global       | Small apps, simple config, no dynamic module injection |
 
 ### Using Configuration in Providers, Controllers, and Dynamic Modules
 
@@ -305,7 +388,7 @@ You can call `forFeature` in multiple modules as long as `forRoot` was called so
 
 - NestJS developers who want type-safe, robust, and maintainable configuration
 - Teams migrating from dotenv, node-config, or @nestjs/config
-- Projects needing multi-source, profile-based, or encrypted config
+- Projects need multi-source, profile-based, or encrypted config
 
 ## Comparison
 
@@ -318,6 +401,8 @@ You can call `forFeature` in multiple modules as long as `forRoot` was called so
 | Encryption      |     ✅ Built-in     |       ❌        |   ❌    |      ❌      |
 | Validation      | ✅ class-validator  |   ⚠️ Manual    |   ❌    |      ❌      |
 | DI integration  |      ✅ Native      |       ✅        |   ❌    |      ❌      |
+| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
+| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
 
 ## License
 

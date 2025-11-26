@@ -4,6 +4,8 @@ export * from './sources';
 export * from './config-manager';
 export * from './container';
 export * from './builder';
+export * from './placeholder-resolver';
+export * from './map-binder';
 
 // Re-export commonly used types
 export type {

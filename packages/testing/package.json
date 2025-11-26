@@ -1,13 +1,13 @@
 {
   "name": "@snow-tzu/type-config-testing",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "Testing utilities for Type Config",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "test": "jest --config ../../jest.config.js --passWithNoTests"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "spring-config",

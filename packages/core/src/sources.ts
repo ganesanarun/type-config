@@ -158,7 +158,7 @@ export class EncryptionHelper {
    * Check if a value is encrypted
    */
   isEncrypted(value: string): boolean {
-    return typeof value === 'string' && /^ENC\([^:]+:.+\)$/.test(value);
+    return /^ENC\([^:]+:.+\)$/.test(value);
   }
 
   /**

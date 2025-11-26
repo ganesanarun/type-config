@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/config-monorepo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Spring Boot-inspired configuration management for Node.js",
   "workspaces": [
@@ -13,7 +13,11 @@
     "test": "yarn workspaces foreach -Apt run test",
     "lint": "yarn workspaces foreach -Apt run lint",
     "clean": "yarn workspaces foreach -Apt run clean && find . -name 'tsconfig.tsbuildinfo' -delete && rm -rf node_modules",
-    "publish:packages": "yarn workspaces foreach -Apt --no-private yarn publish --access public"
+    "version:patch": "yarn workspaces foreach -A --no-private version patch",
+    "version:minor": "yarn workspaces foreach -A --no-private version minor",
+    "version:major": "yarn workspaces foreach -A --no-private version major",
+    "publish:packages": "yarn workspaces foreach -A --no-private npm publish --access public",
+    "publish:package": "yarn workspace"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

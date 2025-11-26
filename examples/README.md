@@ -12,7 +12,6 @@ Basic Express.js application using Type Config.
 
 - Express middleware integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 
 **Start:** `cd express-basic && yarn dev`
@@ -27,7 +26,6 @@ Basic Fastify application using Type Config.
 
 - Fastify plugin integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 - Async/await support
 
@@ -44,7 +42,6 @@ Basic NestJS application using Type Config.
 - NestJS module integration
 - Dependency injection
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 
 **Start:** `cd nestjs-basic && yarn dev`
@@ -57,8 +54,7 @@ NestJS application with remote configuration server support.
 
 **Features:**
 
-- Remote Spring Cloud Config Server integration
-- Automatic config refresh with polling
+- Remote Consul integration
 - Fallback to local configuration
 - Bearer token authentication
 - Manual refresh endpoint
@@ -85,11 +81,36 @@ Pure Node.js application (no framework) using Type Config Core.
 - Direct ConfigManager API usage
 - Built-in HTTP server
 - Profile-based configuration
-- Hot reload support
 - Graceful shutdown handling
 - No framework dependencies
 
 **Start:** `cd nodejs-basic && yarn dev`
+
+---
+
+### 6. Nested Configuration Classes (`nested-basic/`)
+
+NestJS application demonstrating nested configuration classes with full decorator support.
+
+**Features:**
+
+- **Single-level nesting**: Configuration classes containing other configuration classes
+- **Multi-level nesting**: Configuration classes nested multiple levels deep (e.g., `app.server.ssl`)
+- **@DefaultValue decorator**: Default values on nested class properties
+- **@Required decorator**: Required validation on nested class properties
+- **@Validate() decorator**: class-validator integration on nested classes
+- **Optional @ConfigProperty**: Properties bind without @ConfigProperty when names match
+- **Profile-specific configuration**: Different values for development and production
+
+**Start:** `cd nested-basic && yarn dev`
+
+**Production:** `NODE_ENV=production yarn dev`
+
+**Key Concepts:**
+- Nested classes provide modularity and type safety for complex configurations
+- All decorators work recursively at all nesting levels
+- No @ConfigProperty needed when property names match configuration keys
+- Validation errors include full property paths for easy debugging
 
 ---
 
@@ -209,13 +230,6 @@ Each example uses a specific package:
 | nodejs-basic  | `@snow-tzu/type-config`                                         |
 
 ## Testing Configuration Changes
-
-### Hot Reload (Development)
-
-1. Start any example with `yarn dev`
-2. Modify the config file (e.g., `config/application.yml`)
-3. Watch the console for reload message
-4. Visit the `/config` endpoint to see changes
 
 ### Profile Switching
 
