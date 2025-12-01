@@ -46,24 +46,6 @@ describe('ConfigurationBuilder', () => {
     });
   });
 
-  describe('withHotReload', () => {
-    it('should enable hot reload', () => {
-      const builder = new ConfigurationBuilder();
-
-      const result = builder.withHotReload(true);
-
-      expect(result).toBe(builder);
-    });
-
-    it('should enable hot reload by default', () => {
-      const builder = new ConfigurationBuilder();
-
-      const result = builder.withHotReload();
-
-      expect(result).toBe(builder);
-    });
-  });
-
   describe('withEncryption', () => {
     it('should set encryption key', () => {
       const builder = new ConfigurationBuilder();
@@ -217,7 +199,6 @@ describe('ConfigurationBuilder', () => {
         .withProfile('production')
         .withConfigDir('/config')
         .withEnvPrefix('APP_')
-        .withHotReload(false)
         .withValidation(true)
         .addSource(new InMemoryConfigSource({ database: { host: 'localhost' } }, 100))
         .registerConfig(DatabaseConfig)

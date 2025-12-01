@@ -1,6 +1,6 @@
 # @snow-tzu/type-config-nestjs
 
-> **Type-safe, multi-source, hot-reloadable configuration for NestJS**
+> **Type-safe, multi-source, configuration for NestJS**
 
 [![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-nestjs.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-nestjs)
 [![license](https://img.shields.io/npm/l/@snow-tzu/type-config-nestjs.svg)](LICENSE)

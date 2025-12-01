@@ -1,6 +1,6 @@
 # @snow-tzu/type-config-express
 
-> **Type-safe, multi-source, hot-reloadable configuration for Express.js**
+> **Type-safe, multi-source, configuration for Express.js**
 
 [![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-express.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-express)
 [![license](https://img.shields.io/npm/l/@snow-tzu/type-config-express.svg)](LICENSE)

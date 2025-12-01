@@ -53,13 +53,6 @@ export class ExpressConfig {
   }
 
   /**
-   * Listen for configuration changes
-   */
-  onChange(listener: (config: Record<string, any>) => void): () => void {
-    return this.configManager.onChange(listener);
-  }
-
-  /**
    * Get active profile
    */
   getProfile(): string {
@@ -76,7 +69,6 @@ export async function createTypeConfig(options: ExpressConfigOptions = {}): Prom
   if (options.profile) {builder.withProfile(options.profile); }
   if (options.configDir) { builder.withConfigDir(options.configDir); }
   if (options.envPrefix) { builder.withEnvPrefix(options.envPrefix); }
-  if (options.enableHotReload) { builder.withHotReload(options.enableHotReload); }
   if (options.encryptionKey) { builder.withEncryption(options.encryptionKey); }
   if (options.validateOnBind !== undefined) { builder.withValidation(options.validateOnBind); }
   if (options.additionalSources) {

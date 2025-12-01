@@ -10,7 +10,6 @@ export * from './map-binder';
 // Re-export commonly used types
 export type {
   ConfigManagerOptions,
-  ConfigChangeListener,
 } from './config-manager';
 
 export type { ConfigSource } from './sources';

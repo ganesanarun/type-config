@@ -12,7 +12,6 @@ configuration philosophy to your Node.js applications with type-safe, decorator-
 - [Key Features](#key-features)
     - [Profile-Based Configuration](#profile-based-configuration)
     - [Type-Safe Configuration](#type-safe-configuration)
-    - [Hot Reload](#hot-reload)
     - [Encryption](#encryption)
     - [Remote Configuration](#remote-configuration)
     - [Environment Variable Mapping](#environment-variable-mapping)
@@ -33,7 +32,6 @@ configuration philosophy to your Node.js applications with type-safe, decorator-
 🔄 **Profile support** - Environment-based profiles (development, production, etc.)  
 💉 **Dependency injection** - Built-in DI container with framework-native integrations  
 🔐 **Encryption support** - Secure sensitive configuration values with AES-256-CBC  
-🔥 **Hot reload** - Watch and reload configuration changes automatically  
 ✅ **Validation** - Integration with class-validator for config validation  
 🌐 **Remote sources** - AWS Parameter Store, Consul, etcd support  
 🚀 **Framework adapters** - Native integrations for Express, Fastify, and NestJS  
@@ -41,14 +39,14 @@ configuration philosophy to your Node.js applications with type-safe, decorator-
 
 ## Packages
 
-| Package                                                 | Description                                                                     | NPM                                                                                                                               |
-|---------------------------------------------------------|---------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| **[@snow-tzu/type-config](./packages/core)**            | Core configuration system with multi-source loading, hot reload, and encryption | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config)](https://www.npmjs.com/package/@snow-tzu/type-config)                 |
-| **[@snow-tzu/type-config-express](./packages/express)** | Express.js middleware integration                                               | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-express)](https://www.npmjs.com/package/@snow-tzu/type-config-express) |
-| **[@snow-tzu/type-config-fastify](./packages/fastify)** | Fastify plugin for configuration                                                | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify) |
-| **[@snow-tzu/type-config-nestjs](./packages/nestjs)**   | NestJS module with native DI integration                                        | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-nestjs)](https://www.npmjs.com/package/@snow-tzu/type-config-nestjs)   |
-| **[@snow-tzu/type-config-remote](./packages/remote)**   | Remote configuration sources (AWS, Consul, etcd)                                | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-remote)](https://www.npmjs.com/package/@snow-tzu/type-config-remote)   |
-| **[@snow-tzu/type-config-testing](./packages/testing)** | Testing utilities and mocks                                                     | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-testing)](https://www.npmjs.com/package/@snow-tzu/type-config-testing) |
+| Package                                                 | Description                                                         | NPM                                                                                                                               |
+|---------------------------------------------------------|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| **[@snow-tzu/type-config](./packages/core)**            | Core configuration system with multi-source loading, and encryption | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config)](https://www.npmjs.com/package/@snow-tzu/type-config)                 |
+| **[@snow-tzu/type-config-express](./packages/express)** | Express.js middleware integration                                   | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-express)](https://www.npmjs.com/package/@snow-tzu/type-config-express) |
+| **[@snow-tzu/type-config-fastify](./packages/fastify)** | Fastify plugin for configuration                                    | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify) |
+| **[@snow-tzu/type-config-nestjs](./packages/nestjs)**   | NestJS module with native DI integration                            | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-nestjs)](https://www.npmjs.com/package/@snow-tzu/type-config-nestjs)   |
+| **[@snow-tzu/type-config-remote](./packages/remote)**   | Remote configuration sources (AWS, Consul, etcd)                    | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-remote)](https://www.npmjs.com/package/@snow-tzu/type-config-remote)   |
+| **[@snow-tzu/type-config-testing](./packages/testing)** | Testing utilities and mocks                                         | [![npm](https://img.shields.io/npm/v/@snow-tzu/type-config-testing)](https://www.npmjs.com/package/@snow-tzu/type-config-testing) |
 
 ## Quick Start
 
@@ -233,7 +231,7 @@ export class UserService {
 }
 ```
 
-**👉 [See full NestJS example](./examples/nestjs-basic)**
+**👉 [See the full NestJS example](./examples/nestjs-basic)**
 
 #### Vanilla Node.js (Core)
 
@@ -261,7 +259,7 @@ const port = configManager.get('server.port', 3000);
 
 Check out the [examples directory](./examples) for fully working projects:
 
-- **[express-basic](./examples/express-basic)** - Express.js with hot reload and profiles
+- **[express-basic](./examples/express-basic)** - Express.js with profiles
 - **[fastify-basic](./examples/fastify-basic)** - Fastify with plugin integration
 - **[nestjs-basic](./examples/nestjs-basic)** - NestJS with dependency injection
 - **[nestjs-remote](./examples/nestjs-remote)** - NestJS with remote config server
@@ -271,7 +269,6 @@ Each example includes:
 
 - Complete TypeScript setup
 - Configuration files for multiple profiles
-- Hot reload configuration
 - Environment variable support
 - Docker setup (where applicable)
 
@@ -325,23 +322,6 @@ class ApiConfig {
   @DefaultValue(3) // Complex defaults
   maxRetries: number;
 }
-```
-
-### Hot Reload
-
-Automatically reload configuration when files change:
-
-```typescript
-const config = await createTypeConfig({
-  enableHotReload: true,
-  configClasses: [ServerConfig]
-});
-
-// Listen for changes
-config.onChange((newConfig) => {
-  console.log('Configuration reloaded:', newConfig);
-  // Respond to config changes
-});
 ```
 
 ### Encryption
@@ -425,7 +405,6 @@ Type Config is designed for production use with minimal overhead:
 | 🚀 **Value Retrieval**  | >3.6M ops/sec       | Negligible overhead                 |
 | 🎯 **Container Access** | >6.3M ops/sec       | **Recommended** (fastest)           |
 | 💾 **Memory Usage**     | 1-5 MB per instance | Efficient & predictable             |
-| 🔄 **Hot Reload**       | File watching       | Minimal impact                      |
 
 ### Running Benchmarks
 
@@ -469,7 +448,6 @@ yarn benchmark:memory    # Memory usage analysis
 | Type-safe config classes | ✅ Decorator-based          | ❌ Manual typing  |
 | Native DI injection      | ✅ Automatic                | ⚠️ Manual setup  |
 | Profile support          | ✅ Built-in                 | ❌ Manual         |
-| Hot reload               | ✅ Built-in                 | ❌ Not supported  |
 | Encryption               | ✅ Built-in AES-256         | ❌ Manual         |
 | Multi-source merging     | ✅ Priority-based           | ⚠️ Limited       |
 | Remote sources           | ✅ AWS, Consul, etcd        | ❌ Manual         |
@@ -482,7 +460,6 @@ yarn benchmark:memory    # Memory usage analysis
 |-----------------|-------------------|-----------------|
 | Type safety     | ✅ Full TypeScript | ❌ No types      |
 | Validation      | ✅ class-validator | ❌ No validation |
-| Hot reload      | ✅ File watching   | ❌ Static        |
 | Encryption      | ✅ Built-in        | ❌ No support    |
 | DI integration  | ✅ All frameworks  | ❌ None          |
 | Profile support | ✅ Spring-style    | ✅ Basic         |

@@ -11,7 +11,6 @@ import * as path from 'path';
     TypeConfigModule.forRoot({
       profile: process.env.NODE_ENV || 'development',
       configDir: path.join(__dirname, '../config'),
-      enableHotReload: true,
       validateOnBind: true,
       isGlobal: true,
     }),

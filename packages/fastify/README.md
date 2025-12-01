@@ -1,6 +1,6 @@
 # @snow-tzu/type-config-fastify
 
-> **Type-safe, multi-source, hot-reloadable configuration for Fastify**
+> **Type-safe, multi-source, configuration for Fastify**
 
 [![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
 [![license](https://img.shields.io/npm/l/@snow-tzu/type-config-fastify.svg)](LICENSE)

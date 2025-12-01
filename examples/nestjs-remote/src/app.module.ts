@@ -12,7 +12,6 @@ import { AppConfig } from './config/app.config';
     TypeConfigModule.forRoot({
       profile: process.env.NODE_ENV || 'development',
       configDir: './config',
-      enableHotReload: true,
       isGlobal: true,
       // Configure a remote config source using supported property
       additionalSources: [

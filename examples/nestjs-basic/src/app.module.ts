@@ -10,7 +10,6 @@ import { DatabaseConfig } from './config/database.config';
     TypeConfigModule.forRoot({
       profile: process.env.NODE_ENV || 'development',
       configDir: './config',
-      enableHotReload: true,
       isGlobal: true,
     }),
     TypeConfigModule.forFeature([ServerConfig, DatabaseConfig]),

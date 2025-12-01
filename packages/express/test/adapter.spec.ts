@@ -97,29 +97,6 @@ describe('Express Adapter', () => {
       });
     });
 
-    describe('onChange', () => {
-      it('should register change listener', async () => {
-        const expressConfig = new ExpressConfig(configManager, container);
-        const listener = jest.fn();
-
-        expressConfig.onChange(listener);
-        await (configManager as any).reload();
-
-        expect(listener).toHaveBeenCalled();
-      });
-
-      it('should return unsubscribe function', async () => {
-        const expressConfig = new ExpressConfig(configManager, container);
-        const listener = jest.fn();
-
-        const unsubscribe = expressConfig.onChange(listener);
-        unsubscribe();
-        await (configManager as any).reload();
-
-        expect(listener).not.toHaveBeenCalled();
-      });
-    });
-
     describe('getProfile', () => {
       it('should return active profile', () => {
         const expressConfig = new ExpressConfig(configManager, container);
@@ -166,13 +143,6 @@ describe('Express Adapter', () => {
 
     it('should apply config directory option', async () => {
       const result = await createTypeConfig({ configDir: './config' });
-      createdManagers.push(result.configManager);
-
-      expect(result).toBeDefined();
-    });
-
-    it('should apply hot reload option', async () => {
-      const result = await createTypeConfig({ enableHotReload: false });
       createdManagers.push(result.configManager);
 
       expect(result).toBeDefined();
