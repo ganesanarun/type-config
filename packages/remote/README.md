@@ -43,7 +43,7 @@
 ## Installation
 
 ```bash
-npm install @snow-tzu/config-remote @snow-tzu/type-config
+npm install @snow-tzu/type-config-remote @snow-tzu/type-config
 # or
 yarn add @snow-tzu/type-config-remote @snow-tzu/type-config
 
@@ -320,7 +320,7 @@ try {
 
 ## Complete Example
 
-See the **[NestJS Remote Example](../../examples/nestjs-remote)** for a fully working application demonstrating remote
+See the **[NestJS Remote Example](https://github.com/ganesanarun/type-config/blob/main/examples/nestjs-remote)** for a fully working application demonstrating remote
 configuration:
 
 ### Features Demonstrated
@@ -344,7 +344,7 @@ import { RemoteConfigSource } from '@snow-tzu/config-remote';
 
 @Module({
   imports: [
-    SpringConfigModule.forRootAsync({
+    TypeConfigModule.forRootAsync({
       useFactory: async () => ({
         profile: process.env.NODE_ENV || 'development',
         configDir: './config', // Local fallback
@@ -357,8 +357,7 @@ import { RemoteConfigSource } from '@snow-tzu/config-remote';
             pollInterval: 30000, // Auto-refresh every 30 seconds
             priority: 350, // Higher than local files
           })
-        ],
-        enableHotReload: true,
+        ]
       }),
       isGlobal: true,
     }),
@@ -387,7 +386,6 @@ yarn dev
 - `GET /` - Welcome message
 - `GET /config` - View current configuration (local + remote merged)
 - `GET /health` - Health check
-- `GET /refresh` - Manually trigger config refresh from remote server
 
 ### Mock Config Server Response
 
@@ -418,7 +416,7 @@ If you're building your own config server, here's the expected response format:
 
 ### Priority Merging Example
 
-With the remote example, configuration is merged in this order:
+With the remote example, the configuration is merged in this order:
 
 1. **Local base** (`application.yml`) - Priority 100
 2. **Local profile** (`application-production.yml`) - Priority 120
@@ -507,7 +505,7 @@ const source = new EtcdSource({
 ## Who is this for?
 
 - Node.js/TypeScript developers who want type-safe, robust, and maintainable remote configuration
-- Teams needing to merge cloud, local, and environment config
+- Teams needing to merge are cloud, local, and environment config
 - Projects needing secure, profile-based, or encrypted config
 
 ## Comparison

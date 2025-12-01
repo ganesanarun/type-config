@@ -12,7 +12,6 @@
 
 - **Type-safe**: Decorator-based config classes with TypeScript
 - **Profile support**: Spring-style profiles for dev, prod, etc.
-- **Hot reload**: Watch and reload config changes instantly
 - **Multi-source**: Merge YAML, JSON, .env, env vars, remote
 - **NestJS DI**: Config classes are injectable anywhere
 - **Encryption**: Secure secrets with built-in AES-256
@@ -90,7 +89,7 @@ export class AppModule {}
 
 **NestJS deletes the `dist` folder during compilation, which can remove your YAML/JSON configuration files unless properly managed.**
 
-See the [Configuration File Management Guide](../core/CONFIG_FILES.md) for:
+See the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md) for:
 - Why configuration files disappear during builds
 - Solutions for NestJS, Express, Fastify, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -147,14 +146,16 @@ TypeConfigModule.forRoot({
 server:
   host: localhost
   port: 3000
+```
 
 # application-production.yml
+```yaml
 server:
   host: 0.0.0.0
   port: 8080
 ```
 
-For more, see the [Configuration File Management Guide](../core/CONFIG_FILES.md).
+For more, see the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md).
 
 ## Advanced Features
 
@@ -171,7 +172,7 @@ database:
   password: ${DB_PASSWORD}  # No fallback - required in production
 ```
 
-See the [core package documentation](../core/README.md#environment-variable-placeholders) for complete details on placeholder syntax and precedence rules.
+See the [core package documentation](https://github.com/ganesanarun/type-config/blob/main/packages/core/README.md#environment-variable-placeholders) for complete details on placeholder syntax and precedence rules.
 
 ### Map-Based Configuration
 
@@ -234,7 +235,7 @@ export class DatabasesConfig {
 const primary = this.dbConfig.connections['primary'];
 ```
 
-See the [core package documentation](../core/README.md#map-based-configuration) for complete details and the [Map and Placeholders Example](../../examples/map-and-placeholders/) for a full working NestJS application.
+See the [core package documentation](../core/README.md#map-based-configuration) for complete details and the [Map and Placeholders Example](../../../../../../Library/Application%20Support/JetBrains/IntelliJIdea2025.2/scratches/map-and-placeholders/) for a full working NestJS application.
 
 ## Usage Patterns
 
@@ -305,10 +306,10 @@ export class EmailModule {}
 
 #### When to use each pattern
 
-| Pattern         | Use When                                             |
-|----------------|------------------------------------------------------|
-| ConfigModule    | Large apps, dynamic modules, better organization     |
-| Global         | Small apps, simple config, no dynamic module injection|
+| Pattern      | Use When                                               |
+|--------------|--------------------------------------------------------|
+| ConfigModule | Large apps, dynamic modules, better organization       |
+| Global       | Small apps, simple config, no dynamic module injection |
 
 ### Using Configuration in Providers, Controllers, and Dynamic Modules
 
@@ -387,7 +388,7 @@ You can call `forFeature` in multiple modules as long as `forRoot` was called so
 
 - NestJS developers who want type-safe, robust, and maintainable configuration
 - Teams migrating from dotenv, node-config, or @nestjs/config
-- Projects needing multi-source, profile-based, or encrypted config
+- Projects need multi-source, profile-based, or encrypted config
 
 ## Comparison
 

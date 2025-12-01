@@ -2,9 +2,9 @@
 
 > **Type-safe, multi-source, hot-reloadable configuration for Fastify**
 
-[![npm version](https://img.shields.io/npm/v/@snow-tzu/config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/config-fastify)
-[![license](https://img.shields.io/npm/l/@snow-tzu/config-fastify.svg)](LICENSE)
-[![downloads](https://img.shields.io/npm/dm/@snow-tzu/config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/config-fastify)
+[![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
+[![license](https://img.shields.io/npm/l/@snow-tzu/type-config-fastify.svg)](LICENSE)
+[![downloads](https://img.shields.io/npm/dm/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
 
 ---
 
@@ -12,7 +12,6 @@
 
 - **Type-safe**: Decorator-based config classes with TypeScript
 - **Profile support**: Spring-style profiles for dev, prod, etc.
-- **Hot reload**: Watch and reload config changes instantly
 - **Multi-source**: Merge YAML, JSON, .env, env vars, remote
 - **Fastify plugin**: Config and DI in every request
 - **Encryption**: Secure secrets with built-in AES-256
@@ -95,11 +94,15 @@ await fastify.listen({ port: serverConfig.port, host: serverConfig.host });
 
 ### ⚠️ CRITICAL: Configuration File Management
 
-**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless properly configured.
+**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless
+properly configured.
 
-📖 **[Read the Complete Configuration File Management Guide](../core/CONFIG_FILES.md)**
+📖 *
+*[Read the Complete Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md)
+**
 
 This comprehensive guide covers:
+
 - Why configuration files disappear during builds
 - Solutions for Fastify, Express, NestJS, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -225,11 +228,11 @@ services:
 fastify.get('/api/services/:name', async (request, reply) => {
   const servicesConfig = request.container.get(ServicesConfig);
   const endpoint = servicesConfig.endpoints.get(request.params.name);
-  
+
   if (!endpoint) {
     return reply.code(404).send({ error: 'Service not found' });
   }
-  
+
   return endpoint;
 });
 ```
@@ -237,6 +240,7 @@ fastify.get('/api/services/:name', async (request, reply) => {
 **Alternative: Record type** for plain object syntax:
 
 ```typescript
+
 @ConfigurationProperties('services')
 class ServicesConfig {
   @ConfigProperty('endpoints')
@@ -263,17 +267,17 @@ See the [core package documentation](../core/README.md#map-based-configuration) 
 
 ## Comparison
 
-| Feature         | type-config/fastify | fastify-config | dotenv | node-config |
-|-----------------|:-------------------:|:--------------:|:------:|:-----------:|
-| Type safety     |  ✅ Decorators, TS   |       ❌        |   ❌    |      ❌      |
-| Multi-source    |  ✅ YAML, env, etc.  |   ⚠️ Partial   |   ❌    |      ✅      |
-| Profile support |   ✅ Spring-style    |       ❌        |   ❌    |      ✅      |
-| Hot reload      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Encryption      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Validation      |  ✅ class-validator  |       ❌        |   ❌    |      ❌      |
-| DI integration  |    ✅ Per-request    |       ❌        |   ❌    |      ❌      |
-| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
-| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
+| Feature            | type-config/fastify  | fastify-config |  dotenv  | node-config |
+|--------------------|:--------------------:|:--------------:|:--------:|:-----------:|
+| Type safety        |   ✅ Decorators, TS   |       ❌        |    ❌     |      ❌      |
+| Multi-source       |  ✅ YAML, env, etc.   |   ⚠️ Partial   |    ❌     |      ✅      |
+| Profile support    |    ✅ Spring-style    |       ❌        |    ❌     |      ✅      |
+| Hot reload         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Encryption         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Validation         |  ✅ class-validator   |       ❌        |    ❌     |      ❌      |
+| DI integration     |    ✅ Per-request     |       ❌        |    ❌     |      ❌      |
+| Map/Record binding | ✅ Dynamic structures |       ❌        |    ❌     |      ❌      |
+| ENV placeholders   |  ✅ ${VAR:fallback}   |       ❌        | ⚠️ Basic |      ❌      |
 
 ## License
 

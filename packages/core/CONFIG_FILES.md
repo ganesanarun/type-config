@@ -1,6 +1,7 @@
 # Configuration File Management Guide
 
-This guide explains how to properly manage configuration files (YAML, JSON) in your application, especially when using TypeScript compilation and build processes.
+This guide explains how to properly manage configuration files (YAML, JSON) in your application, especially when using
+TypeScript compilation and build processes.
 
 ## Table of Contents
 
@@ -15,7 +16,8 @@ This guide explains how to properly manage configuration files (YAML, JSON) in y
 
 ## Overview
 
-Type Config loads configuration from files (YAML, JSON) at runtime. However, **TypeScript compilation and build tools often delete or don't copy these files to the output directory**, causing runtime errors.
+Type Config loads configuration from files (YAML, JSON) at runtime. However, **TypeScript compilation and build tools
+often delete or don't copy these files to the output directory**, causing runtime errors.
 
 **This is critical**: Your application will fail to start if configuration files are not available at runtime.
 
@@ -57,14 +59,13 @@ Error: ENOENT: no such file or directory, open 'dist/src/config/application.yml'
 Error: Required configuration property 'database.host' is missing
 ```
 
-
 ## Solutions by Framework
 
 ### NestJS
 
 #### Solution 1: Configure nest-cli.json (Recommended)
 
-Add assets configuration to automatically copy config files during build:
+Add asset configuration to automatically copy config files during build:
 
 ```json
 {
@@ -117,7 +118,8 @@ import * as path from 'path';
     }),
   ]
 })
-export class AppModule {}
+export class AppModule {
+}
 ```
 
 ### Express
@@ -211,18 +213,17 @@ const { configManager, container } = await new ConfigurationBuilder()
   .build();
 ```
 
-
 ## Configuration Directory Resolution
 
 ### Understanding __dirname
 
 The `__dirname` variable points to different locations depending on execution context:
 
-| Context | __dirname Value | Config Location |
-|---------|----------------|-----------------|
-| Development (ts-node) | `src/` | `src/config/` |
-| Development (nest start) | `dist/src/` | `dist/src/config/` |
-| Production (compiled) | `dist/` or `dist/src/` | `dist/config/` or `dist/src/config/` |
+| Context                  | __dirname Value        | Config Location                      |
+|--------------------------|------------------------|--------------------------------------|
+| Development (ts-node)    | `src/`                 | `src/config/`                        |
+| Development (nest start) | `dist/src/`            | `dist/src/config/`                   |
+| Production (compiled)    | `dist/` or `dist/src/` | `dist/config/` or `dist/src/config/` |
 
 ### Recommended Patterns
 
@@ -266,7 +267,7 @@ const configDir = process.env.NODE_ENV === 'production'
 
 ### Best Practice
 
-Use Pattern 1 with proper build configuration:
+Use Pattern 1 with a proper build configuration:
 
 ```typescript
 // Always use this pattern
@@ -295,7 +296,9 @@ server:
 database:
   host: localhost
   port: 5432
+```
 
+```yaml
 # 2. application-production.yml (overrides base)
 server:
   host: 0.0.0.0
@@ -308,6 +311,7 @@ database:
 ```
 
 **Final merged configuration**:
+
 ```yaml
 server:
   host: 0.0.0.0        # from production profile
@@ -322,7 +326,8 @@ database:
 
 ### Environment Variable Placeholders
 
-Type Config supports `${VAR_NAME:fallback}` syntax in YAML/JSON files for referencing environment variables with optional fallback values.
+Type Config supports `${VAR_NAME:fallback}` syntax in YAML/JSON files for referencing environment variables with
+optional fallback values.
 
 #### Syntax
 
@@ -332,11 +337,11 @@ database:
   port: ${DB_PORT:5432}                # With fallback
   username: ${DB_USER:postgres}        # With fallback
   password: ${DB_PASSWORD}             # No fallback - undefined if not set
-  
+
 api:
   # Multiple placeholders in one value
   url: ${API_PROTOCOL:https}://${API_HOST:api.example.com}:${API_PORT:443}
-  
+
 message:
   # Escape with backslash for literal ${TEXT}
   template: \${USER} logged in
@@ -350,7 +355,7 @@ message:
 
 #### Precedence Rules
 
-Configuration values are resolved in this order (highest to lowest priority):
+Configuration values are resolved in this order (the highest to lowest priority):
 
 1. **Explicit placeholder in profile-specific file** (e.g., `${PROD_VAR:fallback}`)
 2. **Explicit placeholder in base file** (e.g., `${BASE_VAR:fallback}`)
@@ -358,7 +363,8 @@ Configuration values are resolved in this order (highest to lowest priority):
 4. **Literal value from files**
 5. **Default value from @DefaultValue decorator**
 
-**Critical**: Explicit placeholders take absolute precedence. If you use `${VAR}` in your config, underscore-based ENV resolution will NOT be applied to that field, even if the placeholder fails to resolve.
+**Critical**: Explicit placeholders take absolute precedence. If you use `${VAR}` in your config, underscore-based ENV
+resolution will NOT be applied to that field, even if the placeholder fails to resolve.
 
 #### Example with Profiles
 
@@ -368,7 +374,9 @@ database:
   host: localhost
   username: ${DB_USER:postgres}
   password: ${DB_PASSWORD:defaultpass}
+```
 
+```yaml
 # application-production.yml
 database:
   host: prod-db.example.com
@@ -378,12 +386,15 @@ database:
 
 With `NODE_ENV=production`, `PROD_DB_USER=prod_user`, and `PROD_DB_PASSWORD` not set:
 
-```javascript
+```json5
 {
   database: {
-    host: 'prod-db.example.com',  // Literal from production profile
-    username: 'prod_user',         // From PROD_DB_USER env var
-    password: undefined            // PROD_DB_PASSWORD not set, no fallback
+    host: 'prod-db.example.com',
+    // Literal from production profile
+    username: 'prod_user',
+    // From PROD_DB_USER env var
+    password: undefined
+    // PROD_DB_PASSWORD not set, no fallback
   }
 }
 ```
@@ -398,7 +409,8 @@ const { configManager } = await new ConfigurationBuilder()
 
 ### Map and Record Configuration
 
-Type Config supports binding configuration to `Map<string, T>` or `Record<string, T>` properties for dynamic key-value structures.
+Type Config supports binding configuration to `Map<string, T>` or `Record<string, T>` properties for dynamic key-value
+structures.
 
 #### Map-Based Configuration
 
@@ -438,6 +450,7 @@ databases:
 ```
 
 **Usage**:
+
 ```typescript
 const dbConfig = container.get(DatabasesConfig);
 const primary = dbConfig.connections.get('primary');
@@ -467,6 +480,7 @@ class DatabasesRecordConfig {
 ```
 
 **Usage**:
+
 ```typescript
 const dbConfig = container.get(DatabasesRecordConfig);
 const primary = dbConfig.connections['primary'];
@@ -477,11 +491,11 @@ console.log(`Primary DB: ${primary.host}:${primary.port}`);
 
 #### Map vs Record
 
-| Feature | Map<string, T> | Record<string, T> |
-|---------|----------------|-------------------|
-| **Type** | True Map instance | Plain JavaScript object |
-| **Syntax** | `map.get('key')` | `record['key']` or `record.key` |
-| **Use Case** | Need Map methods (.get, .set, .has) | Prefer plain object syntax |
+| Feature      | Map<string, T>                      | Record<string, T>               |
+|--------------|-------------------------------------|---------------------------------|
+| **Type**     | True Map instance                   | Plain JavaScript object         |
+| **Syntax**   | `map.get('key')`                    | `record['key']` or `record.key` |
+| **Use Case** | Need Map methods (.get, .set, .has) | Prefer plain object syntax      |
 
 #### Combining with Placeholders
 
@@ -518,14 +532,15 @@ const allConnections = configManager.get('databases.connections');
 const cacheHost = configManager.get('databases.connections.cache.host', 'localhost');
 ```
 
-**Note**: When using `configManager.get()` with Map-based configuration, the Map is returned as a plain object for easier access.
-
+**Note**: When using `configManager.get()` with Map-based configuration, the Map is returned as a plain object for
+easier access.
 
 ## Troubleshooting
 
 ### Error: "ENOENT: no such file or directory"
 
 **Symptom**:
+
 ```
 Error: ENOENT: no such file or directory, open '/path/to/dist/config/application.yml'
 ```
@@ -533,23 +548,24 @@ Error: ENOENT: no such file or directory, open '/path/to/dist/config/application
 **Causes & Solutions**:
 
 1. **Config files not copied to dist/**
-   - ✅ Add copy script to package.json
-   - ✅ Configure build tool to copy assets (nest-cli.json for NestJS)
-   - ✅ Verify files exist: `ls dist/src/config/` or `ls dist/config/`
+    - ✅ Add a copy script to package.json
+    - ✅ Configure a build tool to copy assets (nest-cli.json for NestJS)
+    - ✅ Verify files exist: `ls dist/src/config/` or `ls dist/config/`
 
 2. **Wrong configDir path**
-   - ✅ Use `path.join(__dirname, 'config')` instead of relative paths
-   - ✅ Check where __dirname points in your environment
-   - ✅ Add debug logging: `console.log('Config dir:', configDir)`
+    - ✅ Use `path.join(__dirname, 'config')` instead of relative paths
+    - ✅ Check where __dirname points in your environment
+    - ✅ Add debug logging: `console.log('Config dir:', configDir)`
 
 3. **Build process deletes files**
-   - ✅ Ensure copy happens AFTER build
-   - ✅ For NestJS: use nest-cli.json assets configuration
-   - ✅ For others: `"build": "tsc && npm run copy:config"`
+    - ✅ Ensure copy happens AFTER build
+    - ✅ For NestJS: use nest-cli.json assets configuration
+    - ✅ For others: `"build": "tsc && npm run copy:config"`
 
 ### Error: "Required configuration property 'xxx' is missing"
 
 **Symptom**:
+
 ```
 Error: Required configuration property 'database.host' is missing
 ```
@@ -557,26 +573,26 @@ Error: Required configuration property 'database.host' is missing
 **Causes & Solutions**:
 
 1. **Configuration file is empty or not parsed**
-   - ✅ Verify YAML/JSON syntax is valid
-   - ✅ Check file has content: `cat dist/src/config/application.yml`
-   - ✅ Ensure file extension is correct (.yml, .yaml, or .json)
+    - ✅ Verify YAML/JSON syntax is valid
+    - ✅ Check file has content: `cat dist/src/config/application.yml`
+    - ✅ Ensure file extension is correct (.yml, .yaml, or .json)
 
 2. **Wrong profile loaded**
-   - ✅ Check NODE_ENV value: `echo $NODE_ENV`
-   - ✅ Verify profile-specific file exists
-   - ✅ Add logging to see which files are loaded
+    - ✅ Check NODE_ENV value: `echo $NODE_ENV`
+    - ✅ Verify profile-specific file exists
+    - ✅ Add logging to see which files are loaded
 
 3. **Property path mismatch**
-   - ✅ Ensure @ConfigurationProperties prefix matches YAML structure
-   - ✅ Check @ConfigProperty names match YAML keys
-   - ✅ Example:
-     ```typescript
-     @ConfigurationProperties('database')  // Must match YAML
-     class DatabaseConfig {
-       @ConfigProperty('host')  // Must match: database.host
-       host: string;
-     }
-     ```
+    - ✅ Ensure @ConfigurationProperties prefix matches YAML structure
+    - ✅ Check @ConfigProperty names match YAML keys
+    - ✅ Example:
+      ```typescript
+      @ConfigurationProperties('database')  // Must match YAML
+      class DatabaseConfig {
+        @ConfigProperty('host')  // Must match: database.host
+        host: string;
+      }
+      ```
 
 ### Configuration not updating in development
 
@@ -585,119 +601,119 @@ Error: Required configuration property 'database.host' is missing
 **Causes & Solutions**:
 
 1. **Watch mode doesn't copy files**
-   - ✅ Run copy script before starting: `npm run copy:config && npm run dev`
-   - ✅ Or use hot reload: `enableHotReload: true`
+    - ✅ Run copy script before starting: `npm run copy:config && npm run dev`
+    - ✅ Or use hot reload: `enableHotReload: true`
 
 2. **Cached configuration**
-   - ✅ Restart the application
-   - ✅ Clear dist folder: `rm -rf dist && npm run build`
+    - ✅ Restart the application
+    - ✅ Clear dist folder: `rm -rf dist && npm run build`
 
 3. **Wrong file being read**
-   - ✅ Add debug logging to see which file is loaded
-   - ✅ Check if profile-specific file overrides your changes
+    - ✅ Add debug logging to see which file is loaded
+    - ✅ Check if a profile-specific file overrides your changes
 
 ### Files copied but still not found
 
-**Symptom**: Files exist in dist/ but application can't find them
+**Symptom**: Files exist in dist/ but the application can't find them
 
 **Causes & Solutions**:
 
 1. **Working directory mismatch**
-   - ✅ Check current working directory: `console.log(process.cwd())`
-   - ✅ Use absolute paths: `path.join(__dirname, 'config')`
-   - ✅ Don't rely on relative paths like `./config`
+    - ✅ Check current working directory: `console.log(process.cwd())`
+    - ✅ Use absolute paths: `path.join(__dirname, 'config')`
+    - ✅ Don't rely on relative paths like `./config`
 
 2. **Incorrect path in configDir**
-   - ✅ Verify: `console.log('Looking for config at:', configDir)`
-   - ✅ Check file exists: `fs.existsSync(path.join(configDir, 'application.yml'))`
+    - ✅ Verify: `console.log('Looking for config at:', configDir)`
+    - ✅ Check file exists: `fs.existsSync(path.join(configDir, 'application.yml'))`
 
 3. **Symlink or Docker volume issues**
-   - ✅ Use absolute paths
-   - ✅ Verify files are actually copied (not just linked)
-   - ✅ Check Docker volume mounts
+    - ✅ Use absolute paths
+    - ✅ Verify files are actually copied (not just linked)
+    - ✅ Check Docker volume mounts
 
-### Placeholder not resolving
+### Placeholder is not resolving
 
 **Symptom**: `${VAR:fallback}` appears literally in configuration or resolves incorrectly
 
 **Causes & Solutions**:
 
 1. **Placeholder resolution disabled**
-   - ✅ Check if `enablePlaceholderResolution: false` is set
-   - ✅ Default is `true`, so ensure you haven't explicitly disabled it
+    - ✅ Check if `enablePlaceholderResolution: false` is set
+    - ✅ Default is `true`, so ensure you haven't explicitly disabled it
 
 2. **Malformed placeholder syntax**
-   - ✅ Correct: `${VAR_NAME:fallback}` or `${VAR_NAME}`
-   - ✅ Incorrect: `$VAR_NAME`, `${VAR_NAME:}` (empty fallback is valid though)
-   - ✅ Ensure no spaces: `${ VAR }` won't work
+    - ✅ Correct: `${VAR_NAME:fallback}` or `${VAR_NAME}`
+    - ✅ Incorrect: `$VAR_NAME`, `${VAR_NAME:}` (empty fallback is valid though)
+    - ✅ Ensure no spaces: `${ VAR }` won't work
 
 3. **Environment variable name mismatch**
-   - ✅ Check exact variable name: `echo $VAR_NAME`
-   - ✅ Variable names are case-sensitive
-   - ✅ Add debug: `console.log('ENV:', process.env.VAR_NAME)`
+    - ✅ Check exact variable name: `echo $VAR_NAME`
+    - ✅ Variable names are case-sensitive
+    - ✅ Add debug: `console.log('ENV:', process.env.VAR_NAME)`
 
 4. **Escaped placeholder**
-   - ✅ `\${TEXT}` produces literal `${TEXT}` - this is intentional
-   - ✅ Remove backslash if you want resolution
+    - ✅ `\${TEXT}` produces literal `${TEXT}` - this is intentional
+    - ✅ Remove backslash if you want resolution
 
-### Map/Record binding not working
+### Map/Record binding is not working
 
 **Symptom**: Map property is undefined or not a Map instance
 
 **Causes & Solutions**:
 
 1. **TypeScript metadata not emitted**
-   - ✅ Ensure `"emitDecoratorMetadata": true` in tsconfig.json
-   - ✅ Ensure `"experimentalDecorators": true` in tsconfig.json
-   - ✅ Import `reflect-metadata` at application entry point
+    - ✅ Ensure `"emitDecoratorMetadata": true` in tsconfig.json
+    - ✅ Ensure `"experimentalDecorators": true` in tsconfig.json
+    - ✅ Import `reflect-metadata` at application entry point
 
 2. **Configuration structure mismatch**
-   - ✅ YAML must have object structure for Map/Record binding
-   - ✅ Example:
-     ```yaml
-     connections:
-       key1: { host: localhost }
-       key2: { host: remote }
-     ```
-   - ✅ Not: `connections: "string"` or `connections: [array]`
+    - ✅ YAML must have object structure for Map/Record binding
+    - ✅ Example:
+      ```yaml
+      connections:
+        key1: { host: localhost }
+        key2: { host: remote }
+      ```
+    - ✅ Not: `connections: "string"` or `connections: [array]`
 
 3. **Wrong property type annotation**
-   - ✅ Use `Map<string, T>` not `Map<any, any>`
-   - ✅ Use `Record<string, T>` not just `object`
-   - ✅ Ensure value type `T` is properly defined
+    - ✅ Use `Map<string, T>` not `Map<any, any>`
+    - ✅ Use `Record<string, T>` not just `object`
+    - ✅ Ensure value type `T` is properly defined
 
 4. **Map not being created**
-   - ✅ Verify the property is typed as `Map<string, T>` (not just `any` or `object`)
-   - ✅ Check that configuration data exists at the specified path
-   - ✅ Add debug logging: `console.log(configManager.get('your.path'))`
+    - ✅ Verify the property is typed as `Map<string, T>` (not just `any` or `object`)
+    - ✅ Check that configuration data exists at the specified path
+    - ✅ Add debug logging: `console.log(configManager.get('your.path'))`
 
-### Precedence not working as expected
+### Precedence is not working as expected
 
 **Symptom**: Wrong value is used when multiple sources provide the same property
 
 **Causes & Solutions**:
 
 1. **Explicit placeholder vs underscore-based ENV**
-   - ✅ Explicit placeholder `${VAR}` ALWAYS takes precedence
-   - ✅ Even if placeholder fails, underscore-based ENV won't be used
-   - ✅ Example: `password: ${DB_PASS}` with `DATABASE_PASSWORD=secret`
-     - Result: `undefined` (not "secret") if DB_PASS not set
+    - ✅ Explicit placeholder `${VAR}` ALWAYS takes precedence
+    - ✅ Even if the placeholder fails, underscore-based ENV won't be used
+    - ✅ Example: `password: ${DB_PASS}` with `DATABASE_PASSWORD=secret`
+        - Result: `undefined` (not "secret") if DB_PASS not set
 
 2. **Profile-specific not overriding base**
-   - ✅ Verify profile is set: `console.log(configManager.getProfile())`
-   - ✅ Check profile file exists: `application-{profile}.yml`
-   - ✅ Ensure profile file is loaded after base file
+    - ✅ Verify profile is set: `console.log(configManager.getProfile())`
+    - ✅ Check profile file exists: `application-{profile}.yml`
+    - ✅ Ensure the profile file is loaded after a base file
 
 3. **Environment variable not overriding file**
-   - ✅ Check ENV var is actually set: `echo $VAR_NAME`
-   - ✅ Verify underscore-based naming: `DATABASE_HOST` → `database.host`
-   - ✅ For kebab-case: `databases.connections.my-db.host` → `DATABASES_CONNECTIONS_MY_DB_HOST`
+    - ✅ Check ENV var is actually set: `echo $VAR_NAME`
+    - ✅ Verify underscore-based naming: `DATABASE_HOST` → `database.host`
+    - ✅ For kebab-case: `databases.connections.my-db.host` → `DATABASES_CONNECTIONS_MY_DB_HOST`
 
 ## Quick Checklist
 
 Before deploying or running your application:
 
-- [ ] Configuration files exist in source (`src/config/` or `config/`)
+- [ ] Configuration files exist in a source (`src/config/` or `config/`)
 - [ ] Build script copies config files to dist
 - [ ] Verify files in dist: `ls dist/src/config/` or `ls dist/config/`
 - [ ] configDir path uses `path.join(__dirname, 'config')`

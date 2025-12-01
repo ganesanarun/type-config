@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/type-config-fastify",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Type Config plugin for Fastify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

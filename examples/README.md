@@ -12,7 +12,6 @@ Basic Express.js application using Type Config.
 
 - Express middleware integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 
 **Start:** `cd express-basic && yarn dev`
@@ -27,7 +26,6 @@ Basic Fastify application using Type Config.
 
 - Fastify plugin integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 - Async/await support
 
@@ -44,7 +42,6 @@ Basic NestJS application using Type Config.
 - NestJS module integration
 - Dependency injection
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 
 **Start:** `cd nestjs-basic && yarn dev`
@@ -57,8 +54,7 @@ NestJS application with remote configuration server support.
 
 **Features:**
 
-- Remote Spring Cloud Config Server integration
-- Automatic config refresh with polling
+- Remote Consul integration
 - Fallback to local configuration
 - Bearer token authentication
 - Manual refresh endpoint
@@ -85,7 +81,6 @@ Pure Node.js application (no framework) using Type Config Core.
 - Direct ConfigManager API usage
 - Built-in HTTP server
 - Profile-based configuration
-- Hot reload support
 - Graceful shutdown handling
 - No framework dependencies
 
@@ -93,32 +88,7 @@ Pure Node.js application (no framework) using Type Config Core.
 
 ---
 
-### 6. Map and Placeholders (`map-and-placeholders/`)
-
-NestJS application demonstrating advanced Type Config features: Map-based configuration and placeholder resolution.
-
-**Features:**
-
-- **Map-based configuration binding**: Use `Map<string, T>` for collections (databases, services)
-- **Placeholder resolution**: `${VAR:fallback}` syntax with environment variables
-- **Profile-specific placeholders**: Different ENV vars per environment
-- **Precedence rules**: Explicit placeholders vs underscore-based ENV resolution
-- **Nested structures**: Complex objects as map values
-- **Comprehensive validation**: class-validator integration for map entries
-
-**Start:** `cd map-and-placeholders && yarn dev`
-
-**Production:** `NODE_ENV=production yarn dev`
-
-**Key Concepts:**
-- Map binding eliminates repetitive property definitions
-- Placeholders support fallback values for development
-- Profile-specific configs can override which ENV vars are used
-- Both explicit placeholders and underscore-based ENV resolution work together
-
----
-
-### 7. Nested Configuration Classes (`nested-basic/`)
+### 6. Nested Configuration Classes (`nested-basic/`)
 
 NestJS application demonstrating nested configuration classes with full decorator support.
 
@@ -260,13 +230,6 @@ Each example uses a specific package:
 | nodejs-basic  | `@snow-tzu/type-config`                                         |
 
 ## Testing Configuration Changes
-
-### Hot Reload (Development)
-
-1. Start any example with `yarn dev`
-2. Modify the config file (e.g., `config/application.yml`)
-3. Watch the console for reload message
-4. Visit the `/config` endpoint to see changes
 
 ### Profile Switching
 

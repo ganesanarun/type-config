@@ -12,7 +12,6 @@
 
 - **Type-safe**: Decorator-based config classes with TypeScript
 - **Profile support**: Spring-style profiles for dev, prod, etc.
-- **Hot reload**: Watch and reload config changes instantly
 - **Multi-source**: Merge YAML, JSON, .env, env vars, remote
 - **Express middleware**: Config and DI in every request
 - **Encryption**: Secure secrets with built-in AES-256
@@ -96,11 +95,13 @@ app.listen(serverConfig.port, () => {
 
 ### ⚠️ CRITICAL: Configuration File Management
 
-**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless properly configured.
+**TypeScript compilation doesn't copy YAML/JSON files**, which means your configuration files will be lost unless
+properly configured.
 
-📖 **[Read the Complete Configuration File Management Guide](../core/CONFIG_FILES.md)**
+📖 **[Read the Complete Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md)**
 
 This comprehensive guide covers:
+
 - Why configuration files disappear during builds
 - Solutions for Express, NestJS, Fastify, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -226,11 +227,11 @@ services:
 app.get('/api/services/:name', (req, res) => {
   const servicesConfig = req.container!.get(ServicesConfig);
   const endpoint = servicesConfig.endpoints.get(req.params.name);
-  
+
   if (!endpoint) {
     return res.status(404).json({ error: 'Service not found' });
   }
-  
+
   res.json(endpoint);
 });
 ```
@@ -238,6 +239,7 @@ app.get('/api/services/:name', (req, res) => {
 **Alternative: Record type** for plain object syntax:
 
 ```typescript
+
 @ConfigurationProperties('services')
 class ServicesConfig {
   @ConfigProperty('endpoints')
@@ -265,17 +267,16 @@ See the [core package documentation](../core/README.md#map-based-configuration) 
 
 ## Comparison
 
-| Feature         | type-config/express | express-config | dotenv | node-config |
-|-----------------|:-------------------:|:--------------:|:------:|:-----------:|
-| Type safety     |  ✅ Decorators, TS   |       ❌        |   ❌    |      ❌      |
-| Multi-source    |  ✅ YAML, env, etc.  |   ⚠️ Partial   |   ❌    |      ✅      |
-| Profile support |   ✅ Spring-style    |       ❌        |   ❌    |      ✅      |
-| Hot reload      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Encryption      |     ✅ Built-in      |       ❌        |   ❌    |      ❌      |
-| Validation      |  ✅ class-validator  |       ❌        |   ❌    |      ❌      |
-| DI integration  |    ✅ Per-request    |       ❌        |   ❌    |      ❌      |
-| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
-| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
+| Feature            | type-config/express  | express-config |  dotenv  | node-config |
+|--------------------|:--------------------:|:--------------:|:--------:|:-----------:|
+| Type safety        |   ✅ Decorators, TS   |       ❌        |    ❌     |      ❌      |
+| Multi-source       |  ✅ YAML, env, etc.   |   ⚠️ Partial   |    ❌     |      ✅      |
+| Profile support    |    ✅ Spring-style    |       ❌        |    ❌     |      ✅      |
+| Encryption         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Validation         |  ✅ class-validator   |       ❌        |    ❌     |      ❌      |
+| DI integration     |    ✅ Per-request     |       ❌        |    ❌     |      ❌      |
+| Map/Record binding | ✅ Dynamic structures |       ❌        |    ❌     |      ❌      |
+| ENV placeholders   |  ✅ ${VAR:fallback}   |       ❌        | ⚠️ Basic |      ❌      |
 
 ## License
 
