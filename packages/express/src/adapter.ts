@@ -1,5 +1,10 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { ConfigManager, Container, ConfigurationBuilder, ConfigManagerOptions } from '@snow-tzu/type-config';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
+import {
+  ConfigManager,
+  ConfigManagerOptions,
+  ConfigurationBuilder,
+  Container,
+} from '@snow-tzu/type-config';
 
 type Constructor<T = any> = new (...args: any[]) => T;
 
@@ -31,7 +36,7 @@ export class ExpressConfig {
    * Get Express middleware to attach config and container to requests
    */
   middleware(): RequestHandler {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
       req.config = this.configManager;
       req.container = this.container;
       next();
@@ -66,11 +71,21 @@ export class ExpressConfig {
 export async function createTypeConfig(options: ExpressConfigOptions = {}): Promise<ExpressConfig> {
   const builder = new ConfigurationBuilder();
 
-  if (options.profile) {builder.withProfile(options.profile); }
-  if (options.configDir) { builder.withConfigDir(options.configDir); }
-  if (options.envPrefix) { builder.withEnvPrefix(options.envPrefix); }
-  if (options.encryptionKey) { builder.withEncryption(options.encryptionKey); }
-  if (options.validateOnBind !== undefined) { builder.withValidation(options.validateOnBind); }
+  if (options.profile) {
+    builder.withProfile(options.profile);
+  }
+  if (options.configDir) {
+    builder.withConfigDir(options.configDir);
+  }
+  if (options.envPrefix) {
+    builder.withEnvPrefix(options.envPrefix);
+  }
+  if (options.encryptionKey) {
+    builder.withEncryption(options.encryptionKey);
+  }
+  if (options.validateOnBind !== undefined) {
+    builder.withValidation(options.validateOnBind);
+  }
   if (options.additionalSources) {
     options.additionalSources.forEach(source => builder.addSource(source));
   }
@@ -86,8 +101,11 @@ export async function createTypeConfig(options: ExpressConfigOptions = {}): Prom
 /**
  * Express middleware factory for simple use cases
  */
-export function configMiddleware(configManager: ConfigManager, container: Container): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction) => {
+export function configMiddleware(
+  configManager: ConfigManager,
+  container: Container
+): RequestHandler {
+  return (req: Request, _res: Response, next: NextFunction) => {
     req.config = configManager;
     req.container = container;
     next();
