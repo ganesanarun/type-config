@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/type-config-testing",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Testing utilities for Type Config",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
     "test": "jest --passWithNoTests"
   },
   "keywords": [
-    "spring-config",
+    "type-config",
     "testing",
     "mocking"
   ],

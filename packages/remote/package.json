@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/type-config-remote",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Remote configuration sources for Type Config (AWS Parameter Store, Consul, etcd)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
     "test": "jest --passWithNoTests"
   },
   "keywords": [
-    "spring-config",
+    "type-config",
     "remote-config",
     "aws",
     "parameter-store",

@@ -2837,7 +2837,6 @@ __metadata:
   dependencies:
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.10.0"
-    chokidar: "npm:^3.5.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.0"
     dotenv: "npm:^16.3.1"

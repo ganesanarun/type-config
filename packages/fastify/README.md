@@ -1,6 +1,6 @@
 # @snow-tzu/type-config-fastify
 
-> **Type-safe, multi-source, hot-reloadable configuration for Fastify**
+> **Type-safe, multi-source, configuration for Fastify**
 
 [![npm version](https://img.shields.io/npm/v/@snow-tzu/type-config-fastify.svg)](https://www.npmjs.com/package/@snow-tzu/type-config-fastify)
 [![license](https://img.shields.io/npm/l/@snow-tzu/type-config-fastify.svg)](LICENSE)
@@ -34,7 +34,6 @@
 
 - Fastify plugin integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 - Encrypted values
 - Validation with class-validator
@@ -257,7 +256,6 @@ See the [core package documentation](../core/README.md#map-based-configuration) 
 
 - `fastifyTypeConfig(options)` - Register Fastify plugin
 - `get<T>(ConfigClass)` - Get config class instance
-- `onChange(listener)` - Listen for config changes
 
 ## Who is this for?
 
@@ -272,7 +270,6 @@ See the [core package documentation](../core/README.md#map-based-configuration) 
 | Type safety        |   ✅ Decorators, TS   |       ❌        |    ❌     |      ❌      |
 | Multi-source       |  ✅ YAML, env, etc.   |   ⚠️ Partial   |    ❌     |      ✅      |
 | Profile support    |    ✅ Spring-style    |       ❌        |    ❌     |      ✅      |
-| Hot reload         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
 | Encryption         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
 | Validation         |  ✅ class-validator   |       ❌        |    ❌     |      ❌      |
 | DI integration     |    ✅ Per-request     |       ❌        |    ❌     |      ❌      |

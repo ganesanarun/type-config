@@ -46,7 +46,6 @@ async function bootstrap() {
     profile: process.env.NODE_ENV || 'development',
     configDir: './config',
     configClasses: [ServerConfig, DatabaseConfig],
-    enableHotReload: true,
   });
 
   // Register config plugin
@@ -54,7 +53,6 @@ async function bootstrap() {
     profile: process.env.NODE_ENV || 'development',
     configDir: './config',
     configClasses: [ServerConfig, DatabaseConfig],
-    enableHotReload: true,
   });
 
   // Routes
@@ -84,12 +82,6 @@ async function bootstrap() {
 
   fastify.get('/health', async () => {
     return { status: 'ok' };
-  });
-
-  // Listen for config changes
-  configManager.onChange((newConfig) => {
-    console.log(newConfig);
-    console.log('⚡ Configuration reloaded');
   });
 
   // Start server

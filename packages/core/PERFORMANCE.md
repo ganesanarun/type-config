@@ -106,13 +106,13 @@ application startup time.
 
 ### vs. Direct Object Access
 
-| Feature      | Direct Object | Spring Config | Difference         |
-|--------------|---------------|---------------|--------------------|
-| Access speed | ~10M ops/sec  | 6.3M ops/sec  | 0.63x (acceptable) |
-| Type safety  | ❌             | ✅             | Worth the cost     |
-| Validation   | ❌             | ✅             | Worth the cost     |
-| Hot reload   | ❌             | ✅             | Worth the cost     |
-| Profiles     | ❌             | ✅             | Worth the cost     |
+| Feature      | Direct Object | Type Config  | Difference         |
+|--------------|---------------|--------------|--------------------|
+| Access speed | ~10M ops/sec  | 6.3M ops/sec | 0.63x (acceptable) |
+| Type safety  | ❌             | ✅            | Worth the cost     |
+| Validation   | ❌             | ✅            | Worth the cost     |
+| Hot reload   | ❌             | ✅            | Worth the cost     |
+| Profiles     | ❌             | ✅            | Worth the cost     |
 
 **Key Insight**: Slight overhead (~37% slower) is negligible in practice and provides massive benefits.
 

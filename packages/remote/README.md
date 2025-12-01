@@ -129,7 +129,7 @@ const source = new AWSParameterStoreSource({
 Load configuration from Consul KV store.
 
 ```typescript
-import { ConsulSource } from '@snow-tzu/config/remote';
+import { ConsulSource } from '@snow-tzu/type-config-remote';
 
 const config = await new ConfigurationBuilder()
   .addSource(new ConsulSource({
@@ -180,7 +180,7 @@ const source = new ConsulSource({
 Load configuration from the etcd key-value store.
 
 ```typescript
-import { EtcdSource } from '@snow-tzu/config/remote';
+import { EtcdSource } from '@snow-tzu/type-config-remote';
 
 const config = await new ConfigurationBuilder()
   .addSource(new EtcdSource({
@@ -238,10 +238,10 @@ const source = new EtcdSource({
 ## Using with Express
 
 ```typescript
-import { createSpringConfig } from '@snow-tzu/config/express';
-import { AWSParameterStoreSource } from '@snow-tzu/config/remote';
+import { createTypeConfig } from '@snow-tzu/type-config-express';
+import { AWSParameterStoreSource } from '@snow-tzu/type-config-remote';
 
-const config = await createSpringConfig({
+const config = await createTypeConfig({
   profile: 'production',
   configDir: './config',
   additionalSources: [
@@ -257,12 +257,12 @@ const config = await createSpringConfig({
 ## Using with NestJS
 
 ```typescript
-import { SpringConfigModule } from '@snow-tzu/config/nestjs';
-import { ConsulSource } from '@snow-tzu/config/remote';
+import { TypeConfigModule } from '@snow-tzu/type-config-nestjs';
+import { ConsulSource } from '@snow-tzu/type-config-remote';
 
 @Module({
   imports: [
-    SpringConfigModule.forRoot({
+    TypeConfigModule.forRoot({
       profile: 'production',
       additionalSources: [
         new ConsulSource({
@@ -320,7 +320,8 @@ try {
 
 ## Complete Example
 
-See the **[NestJS Remote Example](https://github.com/ganesanarun/type-config/blob/main/examples/nestjs-remote)** for a fully working application demonstrating remote
+See the **[NestJS Remote Example](https://github.com/ganesanarun/type-config/blob/main/examples/nestjs-remote)** for a
+fully working application demonstrating remote
 configuration:
 
 ### Features Demonstrated
@@ -339,8 +340,8 @@ configuration:
 **Remote Config Source Configuration:**
 
 ```typescript
-import { SpringConfigModule } from '@snow-tzu/config-nestjs';
-import { RemoteConfigSource } from '@snow-tzu/config-remote';
+import { TypeConfigModule } from '@snow-tzu/type-config-nestjs';
+import { RemoteConfigSource } from '@snow-tzu/type-config-remote';
 
 @Module({
   imports: [
@@ -430,7 +431,7 @@ Remote values override all others.
 See the remote example's README for AWS Parameter Store setup:
 
 ```typescript
-import { AWSParameterStoreSource } from '@snow-tzu/config-remote';
+import { AWSParameterStoreSource } from '@snow-tzu/type-config-remote';
 
 const source = new AWSParameterStoreSource({
   path: '/myapp/production',
@@ -441,7 +442,7 @@ const source = new AWSParameterStoreSource({
 });
 
 // Use with any framework
-const config = await createSpringConfig({
+const config = await createTypeConfig({
   additionalSources: [source],
   configClasses: [DatabaseConfig]
 });
@@ -468,7 +469,7 @@ server:
 ### Consul Example
 
 ```typescript
-import { ConsulSource } from '@snow-tzu/config-remote';
+import { ConsulSource } from '@snow-tzu/type-config-remote';
 
 const source = new ConsulSource({
   prefix: 'myapp/production',
@@ -484,7 +485,7 @@ const source = new ConsulSource({
 ### etcd Example
 
 ```typescript
-import { EtcdSource } from '@snow-tzu/config-remote';
+import { EtcdSource } from '@snow-tzu/type-config-remote';
 
 const source = new EtcdSource({
   prefix: '/myapp/production',
@@ -510,12 +511,11 @@ const source = new EtcdSource({
 
 ## Comparison
 
-| Feature          | type-config/remote | aws-parameter-store | consul | etcd | node-config |
+| Feature          | type-config-remote | aws-parameter-store | consul | etcd | node-config |
 |------------------|:------------------:|:-------------------:|:------:|:----:|:-----------:|
 | Type safety      |  ✅ Decorators, TS  |          ❌          |   ❌    |  ❌   |      ❌      |
 | Multi-source     |   ✅ Remote+local   |          ❌          |   ❌    |  ❌   |      ✅      |
 | Profile support  |   ✅ Spring-style   |          ❌          |   ❌    |  ❌   |      ✅      |
-| Hot reload       |     ✅ Built-in     |          ❌          |   ❌    |  ❌   |      ❌      |
 | Encryption       |     ✅ Built-in     |          ❌          |   ❌    |  ❌   |      ❌      |
 | Validation       | ✅ class-validator  |          ❌          |   ❌    |  ❌   |      ❌      |
 | Priority merging |       ✅ Yes        |          ❌          |   ❌    |  ❌   |  ⚠️ Manual  |

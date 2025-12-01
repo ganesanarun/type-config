@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import express from 'express';
 import {
-  createTypeConfig,
-  ConfigurationProperties,
   ConfigProperty,
-  Required,
+  ConfigurationProperties,
+  createTypeConfig,
   DefaultValue,
+  Required,
 } from '@snow-tzu/type-config-express';
 
 // Configuration classes
@@ -43,7 +43,6 @@ async function bootstrap() {
     profile: process.env.NODE_ENV || 'development',
     configDir: './config',
     configClasses: [ServerConfig, DatabaseConfig],
-    enableHotReload: true,
   });
 
   // Add middleware
@@ -84,12 +83,6 @@ async function bootstrap() {
   app.listen(serverConfig.port, serverConfig.host, () => {
     console.log(`🚀 Server running on http://${serverConfig.host}:${serverConfig.port}`);
     console.log(`📝 Profile: ${config.getProfile()}`);
-  });
-
-  // Listen for config changes
-  config.onChange((newConfig) => {
-    console.log(newConfig);
-    console.log('⚡ Configuration reloaded');
   });
 }
 

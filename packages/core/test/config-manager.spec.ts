@@ -310,67 +310,13 @@ describe('ConfigManager', () => {
     });
   });
 
-  describe('onChange', () => {
-    it('should notify listeners on config change', async () => {
-      const manager = new ConfigManager({
-        additionalSources: [new InMemoryConfigSource({ test: 'value' }, 100)],
-      });
-      createdManagers.push(manager);
-      await manager.initialize();
-
-      const listener = jest.fn();
-      manager.onChange(listener);
-
-      await (manager as any).reload();
-
-      expect(listener).toHaveBeenCalled();
-      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ test: 'value' }));
-    });
-
-    it('should return unsubscribe function', async () => {
-      const manager = new ConfigManager();
-      createdManagers.push(manager);
-      await manager.initialize();
-
-      const listener = jest.fn();
-      const unsubscribe = manager.onChange(listener);
-
-      unsubscribe();
-      await (manager as any).reload();
-
-      expect(listener).not.toHaveBeenCalled();
-    });
-
-    it('should handle multiple listeners', async () => {
-      const manager = new ConfigManager();
-      createdManagers.push(manager);
-      await manager.initialize();
-
-      const listener1 = jest.fn();
-      const listener2 = jest.fn();
-      manager.onChange(listener1);
-      manager.onChange(listener2);
-
-      await (manager as any).reload();
-
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-    });
-  });
-
   describe('dispose', () => {
     it('should cleanup resources', async () => {
       const manager = new ConfigManager();
       createdManagers.push(manager);
       await manager.initialize();
 
-      const listener = jest.fn();
-      manager.onChange(listener);
-
       await manager.dispose();
-      await (manager as any).reload();
-
-      expect(listener).not.toHaveBeenCalled();
     });
   });
 

@@ -13,11 +13,6 @@ async function bootstrap() {
     // Bind ServerConfig to get port and host
     const serverConfig = configManager.bind(ServerConfig);
 
-    // Register onChange listener that logs configuration reload events
-    configManager.onChange((_newConfig) => {
-      console.log('⚡ Configuration reloaded from remote server');
-    });
-
     // Start the application with a configured host and port
     await app.listen(serverConfig.port, serverConfig.host);
 

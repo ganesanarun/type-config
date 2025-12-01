@@ -45,9 +45,6 @@ const typeConfigPlugin: FastifyPluginAsync<FastifyConfigOptions> = async (
   if (options.envPrefix) {
     builder.withEnvPrefix(options.envPrefix);
   }
-  if (options.enableHotReload) {
-    builder.withHotReload(options.enableHotReload);
-  }
   if (options.encryptionKey) {
     builder.withEncryption(options.encryptionKey);
   }
@@ -101,9 +98,6 @@ export async function createFastifyConfig(options: FastifyConfigOptions = {}) {
   }
   if (options.envPrefix) {
     builder.withEnvPrefix(options.envPrefix);
-  }
-  if (options.enableHotReload) {
-    builder.withHotReload(options.enableHotReload);
   }
   if (options.encryptionKey) {
     builder.withEncryption(options.encryptionKey);

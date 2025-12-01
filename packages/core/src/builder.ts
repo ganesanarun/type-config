@@ -36,14 +36,6 @@ export class ConfigurationBuilder {
   }
 
   /**
-   * Enable hot reload of configuration files
-   */
-  withHotReload(enabled: boolean = true): this {
-    this.options.enableHotReload = enabled;
-    return this;
-  }
-
-  /**
    * Set encryption key for decrypting sensitive values
    */
   withEncryption(key: string): this {

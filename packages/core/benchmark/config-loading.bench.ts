@@ -125,7 +125,7 @@ DATABASE_PORT=5432
   );
 }
 
-async function runBenchmarks() {
+export async function runBenchmarks() {
   console.log('Starting configuration loading benchmarks...\n');
 
   const results = [];
@@ -219,12 +219,8 @@ async function runBenchmarks() {
     )
   );
 
-  // Cleanup
-  rmSync(TEMP_DIR, { recursive: true, force: true });
-
   console.log(formatResults(results));
-  
-  return results;
+  return formatResults(results);
 }
 
 if (require.main === module) {

@@ -42,13 +42,6 @@ describe('Fastify Plugin', () => {
       expect(result.configManager).toBeDefined();
     });
 
-    it('should apply hot reload option', async () => {
-      const result = await createFastifyConfig({ enableHotReload: true });
-      createdManagers.push(result.configManager);
-
-      expect(result.configManager).toBeDefined();
-    });
-
     it('should apply encryption key option', async () => {
       const result = await createFastifyConfig({ encryptionKey: '12345678901234567890123456789012' });
       createdManagers.push(result.configManager);

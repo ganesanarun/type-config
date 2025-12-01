@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as chokidar from 'chokidar';
 import { validateSync, ValidationError } from 'class-validator';
 import {
   CONFIG_PREFIX_KEY,
@@ -17,29 +16,24 @@ export interface ConfigManagerOptions {
   configDir?: string;
   envPrefix?: string;
   additionalSources?: ConfigSource[];
-  enableHotReload?: boolean;
   encryptionKey?: string;
   validateOnBind?: boolean;
   enablePlaceholderResolution?: boolean;
 }
 
-export type ConfigChangeListener = (newConfig: Record<string, any>) => void;
-
 /**
- * Core Configuration Manager with hot reload and validation support
+ * Core Configuration Manager with validation support
  */
 export class ConfigManager {
   private config: Record<string, any> = {};
   private sources: ConfigSource[] = [];
-  private profile: string;
+  private readonly profile: string;
   private initialized = false;
   private configInstances: Map<any, any> = new Map();
-  private watcher?: chokidar.FSWatcher;
-  private changeListeners: ConfigChangeListener[] = [];
-  private encryptionHelper?: EncryptionHelper;
-  private validateOnBind: boolean;
+  private readonly encryptionHelper?: EncryptionHelper;
+  private readonly validateOnBind: boolean;
   private placeholderResolver: PlaceholderResolver;
-  private enablePlaceholderResolution: boolean;
+  private readonly enablePlaceholderResolution: boolean;
   private mapBinder: MapBinder;
 
   constructor(private options: ConfigManagerOptions = {}) {
@@ -85,11 +79,6 @@ export class ConfigManager {
     // Load all sources and merge
     await this.reload();
 
-    // Set up hot reload if enabled
-    if (this.options.enableHotReload && this.options.configDir) {
-      this.setupHotReload();
-    }
-
     this.initialized = true;
   }
 
@@ -131,9 +120,6 @@ export class ConfigManager {
 
     // Clearly cached instances to force rebinding
     this.configInstances.clear();
-
-    // Notify listeners
-    this.notifyListeners();
   }
 
   /**
@@ -143,52 +129,6 @@ export class ConfigManager {
    */
   private resolveEnvironmentVariables(config: Record<string, any>): Record<string, any> {
     return this.placeholderResolver.resolveObject(config);
-  }
-
-  /**
-   * Setup file watcher for hot reload
-   */
-  private setupHotReload(): void {
-    const configDir = this.options.configDir || './config';
-
-    this.watcher = chokidar.watch(configDir, {
-      ignored: /(^|[\/\\])\../, // ignore dotfiles
-      persistent: true,
-      ignoreInitial: true,
-    });
-
-    this.watcher.on('change', async (filePath: string) => {
-      console.log(`Config file changed: ${filePath}, reloading...`);
-      await this.reload();
-    });
-  }
-
-  /**
-   * Add a change listener
-   */
-  onChange(listener: ConfigChangeListener): () => void {
-    this.changeListeners.push(listener);
-
-    // Return unsubscribe function
-    return () => {
-      const index = this.changeListeners.indexOf(listener);
-      if (index > -1) {
-        this.changeListeners.splice(index, 1);
-      }
-    };
-  }
-
-  /**
-   * Notify all change listeners
-   */
-  private notifyListeners(): void {
-    for (const listener of this.changeListeners) {
-      try {
-        listener({ ...this.config });
-      } catch (err) {
-        console.error('Error in config change listener:', err);
-      }
-    }
   }
 
   /**
@@ -341,11 +281,11 @@ export class ConfigManager {
   /**
    * Get all properties to bind for a configuration class
    * Includes both decorated properties and properties with defaults or required metadata
-   * @param instance - The class instance
+   * @param _instance - The class instance
    * @param ConfigClass - The class constructor
    * @returns Map of property keys to configuration paths
    */
-  private getAllProperties(instance: any, ConfigClass: any): Map<string, string> {
+  private getAllProperties(_instance: any, ConfigClass: any): Map<string, string> {
     const properties = Reflect.getMetadata(CONFIG_PROPERTIES_KEY, ConfigClass) || {};
     const result = new Map<string, string>();
 
@@ -377,13 +317,13 @@ export class ConfigManager {
   /**
    * Get all properties for a nested class during binding
    * Includes decorated properties, properties with defaults/required, and properties present in config
-   * @param instance - The nested class instance
+   * @param _instance - The nested class instance
    * @param NestedClass - The nested class constructor
    * @param configValue - The configuration value object
    * @returns Map of property keys to configuration paths
    */
   private getAllPropertiesForNestedClass(
-    instance: any,
+    _instance: any,
     NestedClass: any,
     configValue: any
   ): Map<string, string> {
@@ -502,7 +442,7 @@ export class ConfigManager {
   }
 
   /**
-   * Convert value to appropriate type based on property type and bind nested classes
+   * Convert value to the appropriate type based on a property type and bind nested classes
    * 
    * Handles:
    * - Primitive types (Number, Boolean, String, Array)
@@ -542,7 +482,7 @@ export class ConfigManager {
     // This is a limitation of class-validator, which requires known properties
     // at compile time. Record entries must be validated manually if needed.
     if (type === Object && this.mapBinder.isRecordProperty(instance, propertyKey)) {
-      // Keep as plain object
+      // Keep as a plain object
       return value;
     }
 
@@ -583,10 +523,6 @@ export class ConfigManager {
    * Cleanup resources
    */
   async dispose(): Promise<void> {
-    if (this.watcher) {
-      await this.watcher.close();
-    }
-    this.changeListeners = [];
     this.configInstances.clear();
   }
 }

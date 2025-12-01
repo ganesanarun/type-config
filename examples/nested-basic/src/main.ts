@@ -25,12 +25,6 @@ async function bootstrap() {
     // Get server config for startup
     const appConfig = configManager.bind(AppConfig);
 
-    // Register onChange listener for hot reload
-    configManager.onChange((_newConfig) => {
-      console.log('\n⚡ Configuration reloaded');
-      appService.printConfiguration();
-    });
-
     // Start the application
     await app.listen(appConfig.server.port, appConfig.server.host);
 
