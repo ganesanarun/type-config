@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/type-config",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Core configuration management system with Spring Boot-like features",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

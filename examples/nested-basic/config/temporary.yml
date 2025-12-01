@@ -1,0 +1,22 @@
+app:
+  server:
+    host: localhost
+    port: 3000
+    ssl:
+      enabled: false
+      certPath: ./certs/cert.pem
+
+  database:
+    host: localhost
+    port: 5432
+    username: dev_user
+    password: dev_pass
+    pool:
+      maxConnections: 10
+      minConnections: 2
+
+  services:
+    cache:
+      host: localhost
+      port: 6379
+      ttl: 3600

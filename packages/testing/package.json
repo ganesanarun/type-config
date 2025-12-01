@@ -1,6 +1,6 @@
 {
   "name": "@snow-tzu/type-config-testing",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Testing utilities for Type Config",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

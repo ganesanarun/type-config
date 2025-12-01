@@ -118,6 +118,32 @@ NestJS application demonstrating advanced Type Config features: Map-based config
 
 ---
 
+### 7. Nested Configuration Classes (`nested-basic/`)
+
+NestJS application demonstrating nested configuration classes with full decorator support.
+
+**Features:**
+
+- **Single-level nesting**: Configuration classes containing other configuration classes
+- **Multi-level nesting**: Configuration classes nested multiple levels deep (e.g., `app.server.ssl`)
+- **@DefaultValue decorator**: Default values on nested class properties
+- **@Required decorator**: Required validation on nested class properties
+- **@Validate() decorator**: class-validator integration on nested classes
+- **Optional @ConfigProperty**: Properties bind without @ConfigProperty when names match
+- **Profile-specific configuration**: Different values for development and production
+
+**Start:** `cd nested-basic && yarn dev`
+
+**Production:** `NODE_ENV=production yarn dev`
+
+**Key Concepts:**
+- Nested classes provide modularity and type safety for complex configurations
+- All decorators work recursively at all nesting levels
+- No @ConfigProperty needed when property names match configuration keys
+- Validation errors include full property paths for easy debugging
+
+---
+
 ## Quick Start
 
 ### Install All Dependencies

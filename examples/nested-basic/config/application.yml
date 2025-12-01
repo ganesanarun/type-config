@@ -1,0 +1,3 @@
+app:
+  database:
+    host: ${DB_HOST:localhost}

@@ -428,6 +428,368 @@ See the [Map and Placeholders Example](../../examples/map-and-placeholders/) for
 - Manual validation patterns
 - NestJS integration
 
+### Nested Configuration Classes
+
+Organize complex configuration using nested configuration classes with full decorator support. Decorators like `@DefaultValue`, `@Required`, and `@Validate()` work seamlessly on nested classes, enabling modular, type-safe configuration structures.
+
+#### Why Use Nested Classes?
+
+- **Modularity**: Break complex configuration into logical, reusable components
+- **Type Safety**: Full TypeScript support with IntelliSense for nested structures
+- **Decorator Support**: `@DefaultValue`, `@Required`, and `@Validate()` work at all nesting levels
+- **Validation**: Validate nested structures with class-validator decorators
+- **Maintainability**: Easier to understand and maintain than flat configuration objects
+
+#### Basic Example
+
+```typescript
+import { 
+  ConfigurationProperties, 
+  ConfigProperty, 
+  DefaultValue, 
+  Required,
+  Validate 
+} from '@snow-tzu/type-config';
+import { IsNumber, Min, Max, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+// Nested configuration class
+@Validate()
+class CircuitBreakerOptions {
+  @DefaultValue(10000)
+  @IsNumber()
+  @Min(1000)
+  timeout: number;
+
+  @DefaultValue(50)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  errorThresholdPercentage: number;
+
+  @Required()
+  @IsNumber()
+  volumeThreshold: number;
+}
+
+// Parent configuration class
+@ConfigurationProperties('clients.sample')
+@Validate()
+class SampleClientConfig {
+  @Required()
+  @ConfigProperty('baseUrl')
+  baseURL: string;
+
+  @Required()
+  @ValidateNested()  // Required when parent has @Validate()
+  @Type(() => CircuitBreakerOptions)  // Required when parent has @Validate()
+  circuitBreaker: CircuitBreakerOptions;
+}
+```
+
+```yaml
+# config/application.yml
+clients:
+  sample:
+    baseUrl: https://api.example.com
+    circuitBreaker:
+      volumeThreshold: 10
+      # timeout and errorThresholdPercentage will use defaults
+```
+
+```typescript
+const clientConfig = container.get(SampleClientConfig);
+console.log(clientConfig.circuitBreaker.timeout); // 10000 (default)
+console.log(clientConfig.circuitBreaker.volumeThreshold); // 10 (from config)
+```
+
+#### Key Features
+
+**1. @ConfigProperty is Optional**
+
+When the property name matches the configuration key, you don't need `@ConfigProperty`:
+
+```typescript
+class ServerConfig {
+  @Required()
+  host: string; // Binds to 'host' automatically
+  
+  @ConfigProperty('portNumber')
+  port: number; // Custom path when names differ
+}
+```
+
+**2. Decorators Work at All Levels**
+
+All decorators are processed recursively:
+
+```typescript
+class PoolConfig {
+  @DefaultValue(10)
+  maxConnections: number;
+  
+  @DefaultValue(1)
+  minConnections: number;
+}
+
+class DatabaseConfig {
+  @Required()
+  host: string;
+  
+  @DefaultValue(5432)
+  port: number;
+  
+  pool: PoolConfig; // Nested class with its own decorators
+}
+
+@ConfigurationProperties('app')
+class AppConfig {
+  database: DatabaseConfig; // Multi-level nesting
+}
+```
+
+**3. Validation with class-validator**
+
+Use `@Validate()` on nested classes for comprehensive validation. **Important**: When using `@Validate()` on a parent class with nested class properties, you must add `@ValidateNested()` and `@Type()` decorators:
+
+```typescript
+import { IsUrl, IsNumber, Min, Max, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+@Validate()
+class ApiConfig {
+  @IsUrl()
+  @Required()
+  endpoint: string;
+  
+  @IsNumber()
+  @Min(1000)
+  @Max(30000)
+  @DefaultValue(5000)
+  timeout: number;
+}
+
+@ConfigurationProperties('services')
+@Validate()
+class ServicesConfig {
+  @ValidateNested()  // Required for validation
+  @Type(() => ApiConfig)  // Required for validation
+  api: ApiConfig;
+}
+```
+
+**Why these decorators are required:**
+- `@ValidateNested()` tells class-validator to validate the nested object
+- `@Type(() => ApiConfig)` tells class-transformer what type to instantiate
+- Without these, you'll get an error: "an unknown value was passed to the validate function"
+
+If validation fails, you'll get detailed error messages:
+
+```
+Validation failed for ApiConfig at path 'services.api':
+  - timeout: must be a number conforming to the specified constraints
+  - endpoint: must be a URL address
+```
+
+**Note**: If you don't use `@Validate()` on the parent class, you don't need `@ValidateNested()` and `@Type()`. The nested class will still be instantiated and bound correctly.
+
+**4. Required Properties in Nested Classes**
+
+`@Required()` works in nested classes with clear error messages:
+
+```typescript
+class DatabaseConfig {
+  @Required()
+  host: string;
+  
+  @Required()
+  password: string;
+}
+
+@ConfigurationProperties('app')
+class AppConfig {
+  database: DatabaseConfig;
+}
+```
+
+If `password` is missing:
+```
+Required configuration property 'app.database.password' is missing
+```
+
+**5. DefaultValue Satisfies Required**
+
+When both decorators are present, the default value satisfies the required constraint:
+
+```typescript
+class CacheConfig {
+  @Required()
+  @DefaultValue('localhost')
+  host: string; // No error even if not in config file
+  
+  @Required()
+  @DefaultValue(6379)
+  port: number;
+}
+```
+
+#### Multi-Level Nesting
+
+Nest as deeply as needed - decorators work at all levels:
+
+```typescript
+import { ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+@Validate()
+class SslConfig {
+  @DefaultValue(false)
+  enabled: boolean;
+  
+  @DefaultValue('./certs/cert.pem')
+  certPath: string;
+}
+
+@Validate()
+class ConnectionConfig {
+  @Required()
+  host: string;
+  
+  @DefaultValue(5432)
+  port: number;
+  
+  @ValidateNested()
+  @Type(() => SslConfig)
+  ssl: SslConfig; // Level 3
+}
+
+@Validate()
+class DatabaseConfig {
+  @ValidateNested()
+  @Type(() => ConnectionConfig)
+  primary: ConnectionConfig; // Level 2
+  
+  @ValidateNested()
+  @Type(() => ConnectionConfig)
+  replica: ConnectionConfig;
+}
+
+@ConfigurationProperties('app')
+@Validate()
+class AppConfig {
+  @ValidateNested()
+  @Type(() => DatabaseConfig)
+  database: DatabaseConfig; // Level 1
+}
+```
+
+```yaml
+# config/application.yml
+app:
+  database:
+    primary:
+      host: primary-db.example.com
+      ssl:
+        enabled: true
+    replica:
+      host: replica-db.example.com
+      # Uses defaults for port and ssl
+```
+
+#### Mixing Nested Classes with Other Features
+
+Combine nested classes with placeholders, profiles, and Map/Record types:
+
+```typescript
+class RetryConfig {
+  @DefaultValue(3)
+  maxAttempts: number;
+  
+  @DefaultValue(1000)
+  backoffMs: number;
+}
+
+@ConfigurationProperties('services')
+class ServicesConfig {
+  @ConfigProperty('endpoints')
+  endpoints: Map<string, string>; // Map binding
+  
+  retry: RetryConfig; // Nested class
+}
+```
+
+```yaml
+# config/application.yml
+services:
+  endpoints:
+    api: ${API_URL:https://api.example.com}
+    auth: ${AUTH_URL:https://auth.example.com}
+  retry:
+    maxAttempts: ${MAX_RETRIES:5}
+```
+
+
+**Before** (plain objects, no decorator support):
+
+```typescript
+@ConfigurationProperties('clients.sample')
+class SampleClientConfig {
+  @Required()
+  @ConfigProperty('baseUrl')
+  baseURL: string;
+
+  @Required()
+  @ConfigProperty('circuitBreaker')
+  circuitBreaker: any; // Plain object - decorators don't work
+}
+```
+
+**After** (nested classes with full decorator support):
+
+```typescript
+// Step 1: Create a class for the nested configuration
+@Validate()
+class CircuitBreakerOptions {
+  @DefaultValue(10000)
+  timeout: number;
+
+  @DefaultValue(50)
+  errorThresholdPercentage: number;
+
+  @Required()
+  volumeThreshold: number;
+}
+
+// Step 2: Use the class as the property type
+@ConfigurationProperties('clients.sample')
+@Validate()
+class SampleClientConfig {
+  @Required()
+  @ConfigProperty('baseUrl')
+  baseURL: string;
+
+  @Required()
+  circuitBreaker: CircuitBreakerOptions; // Now fully typed with decorators!
+}
+```
+
+**Benefits of Migration**:
+- ✅ Type safety with IntelliSense
+- ✅ Default values on nested properties
+- ✅ Required validation on nested properties
+- ✅ class-validator integration
+- ✅ Better code organization and reusability
+
+#### Complete Working Example
+
+See the [Nested Configuration Example](../../examples/nested-basic/) for a full working demonstration including:
+- Single-level and multi-level nesting
+- All decorator types (`@DefaultValue`, `@Required`, `@Validate()`)
+- Profile-specific configuration
+- Validation with class-validator
+- Integration with Express/NestJS
+
+
 ## API
 
 ### Decorators
