@@ -10,7 +10,7 @@
     "test": "jest --passWithNoTests"
   },
   "keywords": [
-    "spring-config",
+    "type-config",
     "remote-config",
     "aws",
     "parameter-store",

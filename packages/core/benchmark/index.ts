@@ -23,11 +23,9 @@ async function runAllBenchmarks() {
   // Run configuration loading benchmarks
   console.log('═══════════════════════════════════════════════════════\n');
   console.log('Running configuration loading benchmarks...\n');
-  const loadingModule = await import('./config-loading.bench');
-  // Note: We're importing but the benchmark runs via require.main check
-  
-  output += `## Configuration Loading Performance\n\n`;
-  output += `See console output for detailed results.\n\n`;
+  const { runBenchmarks: runLoadingBenchmarks } = await import('./config-loading.bench');
+  const loadingResults = await runLoadingBenchmarks();
+  output += loadingResults;
 
   console.log('\n═══════════════════════════════════════════════════════\n');
   console.log('Note: Run individual benchmarks for detailed results:\n');

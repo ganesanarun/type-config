@@ -36,7 +36,6 @@
 - Native NestJS DI
 - Module-scoped configs
 - Global or local configuration
-- Hot reload support
 - Encrypted values
 - Validation with class-validator
 - Map & Record binding for dynamic key-value structures
@@ -82,14 +81,19 @@ export class ServerConfig {
     TypeConfigModule.forFeature([ServerConfig, DatabaseConfig])
   ]
 })
-export class AppModule {}
+export class AppModule {
+}
 ```
 
 ## Configuration Files
 
-**NestJS deletes the `dist` folder during compilation, which can remove your YAML/JSON configuration files unless properly managed.**
+**NestJS deletes the `dist` folder during compilation, which can remove your YAML/JSON configuration files unless
+properly managed.**
 
-See the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md) for:
+See
+the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md)
+for:
+
 - Why configuration files disappear during builds
 - Solutions for NestJS, Express, Fastify, and vanilla Node.js
 - Configuration directory resolution patterns
@@ -149,13 +153,15 @@ server:
 ```
 
 # application-production.yml
+
 ```yaml
 server:
   host: 0.0.0.0
   port: 8080
 ```
 
-For more, see the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md).
+For more, see
+the [Configuration File Management Guide](https://github.com/ganesanarun/type-config/blob/main/packages/core/CONFIG_FILES.md).
 
 ## Advanced Features
 
@@ -172,7 +178,9 @@ database:
   password: ${DB_PASSWORD}  # No fallback - required in production
 ```
 
-See the [core package documentation](https://github.com/ganesanarun/type-config/blob/main/packages/core/README.md#environment-variable-placeholders) for complete details on placeholder syntax and precedence rules.
+See
+the [core package documentation](https://github.com/ganesanarun/type-config/blob/main/packages/core/README.md#environment-variable-placeholders)
+for complete details on placeholder syntax and precedence rules.
 
 ### Map-Based Configuration
 
@@ -212,9 +220,11 @@ databases:
 **Usage in services:**
 
 ```typescript
+
 @Injectable()
 export class DatabaseService {
-  constructor(private readonly dbConfig: DatabasesConfig) {}
+  constructor(private readonly dbConfig: DatabasesConfig) {
+  }
 
   getConnection(name: string) {
     return this.dbConfig.connections.get(name);
@@ -225,6 +235,7 @@ export class DatabaseService {
 **Alternative: Record type** for plain object syntax:
 
 ```typescript
+
 @ConfigurationProperties('databases')
 export class DatabasesConfig {
   @ConfigProperty('connections')
@@ -235,17 +246,21 @@ export class DatabasesConfig {
 const primary = this.dbConfig.connections['primary'];
 ```
 
-See the [core package documentation](https://github.com/ganesanarun/type-config/tree/main/packages/core#map-based-configuration) for complete details.
+See
+the [core package documentation](https://github.com/ganesanarun/type-config/tree/main/packages/core#map-based-configuration)
+for complete details.
 
 ## Usage Patterns
 
 ### Global and Module-Scoped Configuration
 
-You can use configuration globally or module-scoped. For most apps, set `isGlobal: true` in `forRoot` and register config classes with `forFeature`.
+You can use configuration globally or module-scoped. For most apps, set `isGlobal: true` in `forRoot` and register
+config classes with `forFeature`.
 
 #### Global Configuration (Recommended for most apps)
 
 ```typescript
+
 @Module({
   imports: [
     TypeConfigModule.forRoot({
@@ -258,18 +273,21 @@ You can use configuration globally or module-scoped. For most apps, set `isGloba
     ProductModule,
   ]
 })
-export class AppModule {}
+export class AppModule {
+}
 
 // user.service.ts
 @Injectable()
 export class UserService {
-  constructor(private readonly dbConfig: DatabaseConfig) {}
+  constructor(private readonly dbConfig: DatabaseConfig) {
+  }
 }
 ```
 
 #### Module-Scoped Configuration (for feature modules)
 
-Call `forRoot` once (in AppModule or a dedicated ConfigModule), then use `forFeature` in feature modules to register additional config classes.
+Call `forRoot` once (in AppModule or a dedicated ConfigModule), then use `forFeature` in feature modules to register
+additional config classes.
 
 ```typescript
 // config.module.ts
@@ -284,7 +302,8 @@ Call `forRoot` once (in AppModule or a dedicated ConfigModule), then use `forFea
   ],
   exports: [TypeConfigModule], // Export to make configs available elsewhere
 })
-export class ConfigModule {}
+export class ConfigModule {
+}
 
 // email/email.module.ts
 @Module({
@@ -295,14 +314,18 @@ export class ConfigModule {}
   providers: [EmailService],
   exports: [EmailService]
 })
-export class EmailModule {}
+export class EmailModule {
+}
 ```
 
 **Note:**
+
 - `forRoot()` must be called once to create the ConfigManager.
 - `forFeature()` registers config classes with the existing ConfigManager.
-- Always export `TypeConfigModule` from your ConfigModule if you want to use configs in other modules (especially for dynamic modules).
-- If you forget to export, you’ll get errors like: `Nest can't resolve dependencies of the XxxModule (?, ?). Please make sure that the argument YourConfig at index [0] is available...`
+- Always export `TypeConfigModule` from your ConfigModule if you want to use configs in other modules (especially for
+  dynamic modules).
+- If you forget to export, you’ll get errors like:
+  `Nest can't resolve dependencies of the XxxModule (?, ?). Please make sure that the argument YourConfig at index [0] is available...`
 
 #### When to use each pattern
 
@@ -316,15 +339,18 @@ export class EmailModule {}
 - **Constructor injection** is recommended:
 
 ```typescript
+
 @Injectable()
 export class UserService {
-  constructor(private readonly dbConfig: DatabaseConfig) {}
+  constructor(private readonly dbConfig: DatabaseConfig) {
+  }
 }
 ```
 
 - **Property injection** is also supported:
 
 ```typescript
+
 @Injectable()
 export class UserService {
   @Inject(DatabaseConfig)
@@ -334,7 +360,8 @@ export class UserService {
 
 - **Controllers** and **Guards** can inject config classes the same way.
 
-- **Dynamic modules** (e.g., LoggerModule, TypeOrmModule) require you to import your ConfigModule and inject config classes in `useFactory`:
+- **Dynamic modules** (e.g., LoggerModule, TypeOrmModule) require you to import your ConfigModule and inject config
+  classes in `useFactory`:
 
 ```typescript
 LoggerModule.forRootAsync({
@@ -355,14 +382,14 @@ LoggerModule.forRootAsync({
 Initializes the configuration system. Call once at the application root (AppModule or ConfigModule).
 
 Options:
+
 ```typescript
 {
-  profile?: string;           // Environment profile (default: process.env.NODE_ENV || 'development')
-  configDir?: string;         // Directory containing config files (default: './config')
-  isGlobal?: boolean;         // Make module global (default: true)
-  enableHotReload?: boolean;  // Enable hot reload (default: false)
-  encryptionKey?: string;     // Key for decrypting encrypted values
-  validateOnBind?: boolean;   // Enable validation (default: true)
+  profile ? : string;           // Environment profile (default: process.env.NODE_ENV || 'development')
+  configDir ? : string;         // Directory containing config files (default: './config')
+  isGlobal ? : boolean;         // Make module global (default: true)
+  encryptionKey ? : string;     // Key for decrypting encrypted values
+  validateOnBind ? : boolean;   // Enable validation (default: true)
 }
 ```
 
@@ -370,7 +397,8 @@ Options:
 
 Registers configuration classes for dependency injection. Requires `forRoot()` to be called first.
 
-You can call `forFeature` in multiple modules as long as `forRoot` was called somewhere (usually in AppModule or ConfigModule).
+You can call `forFeature` in multiple modules as long as `forRoot` was called somewhere (usually in AppModule or
+ConfigModule).
 
 ### Decorators
 
@@ -392,17 +420,16 @@ You can call `forFeature` in multiple modules as long as `forRoot` was called so
 
 ## Comparison
 
-| Feature         | type-config/nestjs | @nestjs/config | dotenv | node-config |
-|-----------------|:------------------:|:--------------:|:------:|:-----------:|
-| Type safety     |  ✅ Decorators, TS  |   ⚠️ Partial   |   ❌    |      ❌      |
-| Multi-source    | ✅ YAML, env, etc.  |   ⚠️ Limited   |   ❌    |      ✅      |
-| Profile support |   ✅ Spring-style   |       ❌        |   ❌    |      ✅      |
-| Hot reload      |     ✅ Built-in     |       ❌        |   ❌    |      ❌      |
-| Encryption      |     ✅ Built-in     |       ❌        |   ❌    |      ❌      |
-| Validation      | ✅ class-validator  |   ⚠️ Manual    |   ❌    |      ❌      |
-| DI integration  |      ✅ Native      |       ✅        |   ❌    |      ❌      |
-| Map/Record binding |  ✅ Dynamic structures  |       ❌        |   ❌    |      ❌      |
-| ENV placeholders  |  ✅ ${VAR:fallback}  |       ❌        |   ⚠️ Basic    |      ❌      |
+| Feature            |  type-config/nestjs  | @nestjs/config |  dotenv  | node-config |
+|--------------------|:--------------------:|:--------------:|:--------:|:-----------:|
+| Type safety        |   ✅ Decorators, TS   |   ⚠️ Partial   |    ❌     |      ❌      |
+| Multi-source       |  ✅ YAML, env, etc.   |   ⚠️ Limited   |    ❌     |      ✅      |
+| Profile support    |    ✅ Spring-style    |       ❌        |    ❌     |      ✅      |
+| Encryption         |      ✅ Built-in      |       ❌        |    ❌     |      ❌      |
+| Validation         |  ✅ class-validator   |   ⚠️ Manual    |    ❌     |      ❌      |
+| DI integration     |       ✅ Native       |       ✅        |    ❌     |      ❌      |
+| Map/Record binding | ✅ Dynamic structures |       ❌        |    ❌     |      ❌      |
+| ENV placeholders   |  ✅ ${VAR:fallback}   |       ❌        | ⚠️ Basic |      ❌      |
 
 ## License
 

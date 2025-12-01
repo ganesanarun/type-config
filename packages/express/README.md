@@ -34,7 +34,6 @@
 
 - Express middleware integration
 - Profile-based configuration
-- Hot reload support
 - Type-safe configuration classes
 - Encrypted values
 - Validation with class-validator
@@ -53,7 +52,7 @@ yarn add @snow-tzu/type-config-express reflect-metadata
 
 ```typescript
 import express from 'express';
-import { createTypeConfig, ConfigurationProperties, ConfigProperty } from '@snow-tzu/config-express';
+import { createTypeConfig, ConfigurationProperties, ConfigProperty } from '@snow-tzu/type-config-express';
 
 @ConfigurationProperties('server')
 class ServerConfig {
@@ -257,7 +256,6 @@ See the [core package documentation](../core/README.md#map-based-configuration) 
 - `createTypeConfig(options)` - Create a new Express config instance
 - `middleware()` - Get Express middleware
 - `get<T>(ConfigClass)` - Get config class instance
-- `onChange(listener)` - Listen for config changes
 
 ## Who is this for?
 

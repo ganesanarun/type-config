@@ -10,7 +10,7 @@
     "test": "jest --passWithNoTests"
   },
   "keywords": [
-    "spring-config",
+    "type-config",
     "express",
     "configuration",
     "middleware"

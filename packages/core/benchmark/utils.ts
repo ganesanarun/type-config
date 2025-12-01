@@ -22,11 +22,7 @@ export async function benchmark(
   fn: () => void | Promise<void>,
   options: BenchmarkOptions = {}
 ): Promise<BenchmarkResult> {
-  const {
-    warmupIterations = 100,
-    iterations = 1000,
-    minTime = 1000,
-  } = options;
+  const { warmupIterations = 100, iterations = 1000, minTime = 1000 } = options;
 
   // Warmup phase
   for (let i = 0; i < warmupIterations; i++) {
@@ -38,7 +34,7 @@ export async function benchmark(
   const startTime = performance.now();
   let iterationCount = 0;
 
-  while (iterationCount < iterations || (performance.now() - startTime) < minTime) {
+  while (iterationCount < iterations || performance.now() - startTime < minTime) {
     const start = performance.now();
     await fn();
     const end = performance.now();
@@ -74,7 +70,7 @@ function percentile(sorted: number[], p: number): number {
 
 export function formatResults(results: BenchmarkResult[]): string {
   let output = '\n## Benchmark Results\n\n';
-  
+
   for (const result of results) {
     output += `### ${result.name}\n`;
     output += `- Operations/sec: ${result.opsPerSecond.toFixed(2)}\n`;
@@ -87,14 +83,6 @@ export function formatResults(results: BenchmarkResult[]): string {
     output += `- Total iterations: ${result.iterations}\n`;
     output += `- Total time: ${result.totalTimeMs.toFixed(2)}ms\n\n`;
   }
-  
-  return output;
-}
 
-export function formatComparison(baseline: BenchmarkResult, current: BenchmarkResult): string {
-  const speedup = current.opsPerSecond / baseline.opsPerSecond;
-  const speedupPercent = ((speedup - 1) * 100).toFixed(2);
-  const sign = speedup >= 1 ? '+' : '';
-  
-  return `${current.name} vs ${baseline.name}: ${sign}${speedupPercent}% (${speedup.toFixed(2)}x)`;
+  return output;
 }

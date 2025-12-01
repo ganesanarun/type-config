@@ -24,11 +24,10 @@
 
 | Operation        | Performance         | Assessment              |
 |------------------|---------------------|-------------------------|
-| Config Loading   | 2.7k–8.8k ops/sec   | Sub-millisecond typical |
-| Value Retrieval  | >3.6M ops/sec       | Negligible overhead     |
-| Container Access | >6.3M ops/sec       | Fastest (recommended)   |
+| Config Loading   | 1.6k–6.2k ops/sec   | Sub-millisecond typical |
+| Value Retrieval  | >3.2M ops/sec       | Negligible overhead     |
+| Container Access | >5.9M ops/sec       | Fastest (recommended)   |
 | Memory Usage     | 1–5 MB per instance | Efficient & predictable |
-| Hot Reload       | File watching       | Minimal impact          |
 
 > **Run benchmarks:**
 > ```bash
@@ -62,7 +61,6 @@
 - 🎯 **Type-safe configuration** - Decorator-based config binding with TypeScript support
 - 📁 **Multi-source loading** - JSON, YAML, .env files, and environment variables
 - 🔄 **Profile support** - Environment-based configuration profiles
-- 🔥 **Hot reload** - Watch and reload configuration changes
 - 🔐 **Encryption** - Built-in support for encrypted values
 - ✅ **Validation** - Integration with class-validator
 - 💉 **DI Container** - Simple dependency injection system

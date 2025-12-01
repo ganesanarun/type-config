@@ -6,10 +6,10 @@ Get started with Type Config in minutes!
 
 ```bash
 # Choose your framework
-yarn add @snow-tzu/config/express reflect-metadata    # For Express
-yarn add @snow-tzu/config/fastify reflect-metadata    # For Fastify
-yarn add @snow-tzu/config/nestjs reflect-metadata     # For NestJS
-yarn add @snow-tzu/config/core reflect-metadata       # Core only
+yarn add @snow-tzu/type-config-express reflect-metadata    # For Express
+yarn add @snow-tzu/type-config-fastify reflect-metadata    # For Fastify
+yarn add @snow-tzu/type-config-nestjs reflect-metadata     # For NestJS
+yarn add @snow-tzu/type-config reflect-metadata       # Core only
 ```
 
 ## 1. Create Configuration Classes
